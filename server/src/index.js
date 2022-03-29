@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const PORT = process.env.SERVER_PORT || 5001;
 const userRouter = require('./routes/user-auth-router');
+const cors = require('cors');
 
 const app = express();
 
@@ -22,6 +23,7 @@ mongoose.connect(process.env.MONGO_URL, {
 // Middlewares configuration
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(cors());
 
 // Routers connection
 app.use('/user/auth/', userRouter);

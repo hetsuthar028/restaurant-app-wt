@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import Helpertext from "../shared/HelperText";
 import TextInput from "../shared/TextInput";
+import { useSnackbar } from "notistack";
+import axios from "axios";
 
 const initialFormValues = {
     email: "",
@@ -25,6 +27,7 @@ const emailRegExp =
 const SignUp = () => {
     const [formValues, setFormValues] = useState(initialFormValues);
     const [formErrors, setFormErrors] = useState({});
+    const { enqueueSnackbar } = useSnackbar();
 
     const validateInput = (name, value) => {
         if (name === "email" && !emailRegExp.test(value)) {
@@ -56,8 +59,26 @@ const SignUp = () => {
             ...formErrors,
             [name]: validateInput(name, value),
         });
+    };
 
-        console.log("Form errors", formErrors);
+    const handleRegularSignUp = (e) => {
+        e.preventDefault();
+
+        axios
+            .post(`http://localhost:5001/user/auth/signup`, {
+                ...formValues,
+            })
+            .then((response) => {
+                return enqueueSnackbar("Account created successfully!", {
+                    variant: "success",
+                });
+            })
+            .catch((err) => {
+                return enqueueSnackbar(
+                    err?.response?.data?.message ?? "Please try again!",
+                    { variant: "error" }
+                );
+            });
     };
 
     return (
@@ -69,88 +90,102 @@ const SignUp = () => {
                     style={{ height: "100vh" }}
                 />
             </Grid>
-            <Grid item xs={12} md={5} sm={5} sx={{ p: 2 }}>
-                <Typography variant="h4" textAlign="center" my={2}>
-                    Sign Up
-                </Typography>
+            <Grid
+                item
+                xs={12}
+                md={5}
+                sm={5}
+                sx={{
+                    p: 2,
+                    display: "grid",
+                    minHeight: "100vh",
+                    alignContent: "center",
+                }}
+            >
+                <form method="POST" onSubmit={handleRegularSignUp}>
+                    <Typography variant="h4" textAlign="center" my={2}>
+                        Sign Up
+                    </Typography>
 
-                <center>
-                    <FormControl fullWidth sx={{ width: "80%" }}>
-                        <TextInput
-                            name="email"
-                            placeholder="Email address"
-                            type="email"
-                            label="Email address"
-                            value={formValues.email}
-                            onChange={handleInputChange}
+                    <center>
+                        <FormControl fullWidth sx={{ width: "80%" }}>
+                            <TextInput
+                                name="email"
+                                placeholder="Email address"
+                                type="email"
+                                label="Email address"
+                                value={formValues.email}
+                                onChange={handleInputChange}
+                            />
+                        </FormControl>
+                        <Helpertext
+                            text={formErrors.email}
+                            style={{ width: "80%" }}
                         />
-                    </FormControl>
-                    <Helpertext
-                        text={formErrors.email}
-                        style={{ width: "80%" }}
-                    />
 
-                    <FormControl fullWidth sx={{ width: "80%" }}>
-                        <TextInput
-                            name="username"
-                            placeholder="Username"
-                            label="Username"
-                            value={formValues.username}
-                            onChange={handleInputChange}
+                        <FormControl fullWidth sx={{ width: "80%" }}>
+                            <TextInput
+                                name="username"
+                                placeholder="Username"
+                                label="Username"
+                                value={formValues.username}
+                                onChange={handleInputChange}
+                            />
+                        </FormControl>
+                        <Helpertext
+                            text={formErrors.username}
+                            style={{ width: "80%" }}
                         />
-                    </FormControl>
-                    <Helpertext
-                        text={formErrors.username}
-                        style={{ width: "80%" }}
-                    />
 
-                    <FormControl fullWidth sx={{ width: "80%" }}>
-                        <TextInput
-                            name="password"
-                            type="password"
-                            placeholder="Password"
-                            label="Password"
-                            value={formValues.password}
-                            onChange={handleInputChange}
+                        <FormControl fullWidth sx={{ width: "80%" }}>
+                            <TextInput
+                                name="password"
+                                type="password"
+                                placeholder="Password"
+                                label="Password"
+                                value={formValues.password}
+                                onChange={handleInputChange}
+                            />
+                        </FormControl>
+                        <Helpertext
+                            text={formErrors.password}
+                            style={{ width: "80%" }}
                         />
-                    </FormControl>
-                    <Helpertext
-                        text={formErrors.password}
-                        style={{ width: "80%" }}
-                    />
 
-                    <FormControl fullWidth sx={{ width: "80%" }}>
-                        <TextInput
-                            name="confirmPassword"
-                            type="password"
-                            placeholder="Confirm Password"
-                            label="Confirm Password"
-                            value={formValues.confirmPassword}
-                            onChange={handleInputChange}
+                        <FormControl fullWidth sx={{ width: "80%" }}>
+                            <TextInput
+                                name="confirmPassword"
+                                type="password"
+                                placeholder="Confirm Password"
+                                label="Confirm Password"
+                                value={formValues.confirmPassword}
+                                onChange={handleInputChange}
+                            />
+                        </FormControl>
+                        <Helpertext
+                            text={formErrors.confirmPassword}
+                            style={{ width: "80%" }}
                         />
-                    </FormControl>
-                    <Helpertext
-                        text={formErrors.confirmPassword}
-                        style={{ width: "80%" }}
-                    />
 
-                    <FormControl fullWidth sx={{ width: "80%" }}>
-                        <Button
-                            variant="contained"
-                            size="large"
-                            sx={{ backgroundColor: "#DD7230", mt: 2 }}
-                        >
-                            Sign Up
-                        </Button>
-                    </FormControl>
+                        <FormControl fullWidth sx={{ width: "80%" }}>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ backgroundColor: "#DD7230", mt: 2 }}
+                                type="submit"
+                            >
+                                Sign Up
+                            </Button>
+                        </FormControl>
 
-                    <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                        <Button variant="contained">Google</Button>
-                    </FormControl>
-                    <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                        <Button variant="contained">Facebook</Button>
-                    </FormControl>
-                </center>
+                        <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
+                            <Button variant="contained">Google</Button>
+                        </FormControl>
+                        <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
+                            <Button variant="contained">Facebook</Button>
+                        </FormControl>
+                    </center>
+                </form>
             </Grid>
         </Grid>
     );

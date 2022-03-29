@@ -1,15 +1,17 @@
 import React from "react";
-import WelcomePage from "./components/welcome-screen/WelcomePage";
 import AppRouter from "./router/AppRouter";
 import { ThemeProvider } from "@mui/material";
-import { THEME } from './theme/theme';
+import { THEME } from "./theme/theme";
+import { SnackbarProvider } from "notistack";
 
 function App() {
     return (
         <div className="App">
-            <ThemeProvider theme={THEME}>
-                <AppRouter />
-            </ThemeProvider>
+            <SnackbarProvider maxSnack={3}>
+                <ThemeProvider theme={THEME}>
+                    <AppRouter />
+                </ThemeProvider>
+            </SnackbarProvider>
         </div>
     );
 }
