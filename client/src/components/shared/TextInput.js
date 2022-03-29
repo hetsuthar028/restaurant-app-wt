@@ -10,6 +10,7 @@ const TextInput = (props) => {
         value,
         onChange,
         required = true,
+        error = false
     } = props;
 
     return (
@@ -22,6 +23,7 @@ const TextInput = (props) => {
             required={required}
             name={name}
             sx={{ my: 0.5 }}
+            error={error}
         />
     );
 };

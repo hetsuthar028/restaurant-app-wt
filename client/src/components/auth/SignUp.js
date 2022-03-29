@@ -13,6 +13,7 @@ import Helpertext from "../shared/HelperText";
 import TextInput from "../shared/TextInput";
 import { useSnackbar } from "notistack";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const initialFormValues = {
     email: "",
@@ -27,6 +28,7 @@ const emailRegExp =
 const SignUp = () => {
     const [formValues, setFormValues] = useState(initialFormValues);
     const [formErrors, setFormErrors] = useState({});
+    const [hasErrors, setHasErrors] = useState(true);
     const { enqueueSnackbar } = useSnackbar();
 
     const validateInput = (name, value) => {
@@ -60,6 +62,14 @@ const SignUp = () => {
             [name]: validateInput(name, value),
         });
     };
+
+    useEffect(() => {
+        setHasErrors(
+            Object.keys(formErrors).some((key) => {
+                return !!formErrors[key];
+            })
+        );
+    }, [formErrors]);
 
     const handleRegularSignUp = (e) => {
         e.preventDefault();
@@ -116,6 +126,7 @@ const SignUp = () => {
                                 label="Email address"
                                 value={formValues.email}
                                 onChange={handleInputChange}
+                                error={!!formErrors.email}
                             />
                         </FormControl>
                         <Helpertext
@@ -130,6 +141,7 @@ const SignUp = () => {
                                 label="Username"
                                 value={formValues.username}
                                 onChange={handleInputChange}
+                                error={!!formErrors.username}
                             />
                         </FormControl>
                         <Helpertext
@@ -145,6 +157,7 @@ const SignUp = () => {
                                 label="Password"
                                 value={formValues.password}
                                 onChange={handleInputChange}
+                                error={!!formErrors.password}
                             />
                         </FormControl>
                         <Helpertext
@@ -160,6 +173,7 @@ const SignUp = () => {
                                 label="Confirm Password"
                                 value={formValues.confirmPassword}
                                 onChange={handleInputChange}
+                                error={!!formErrors.confirmPassword}
                             />
                         </FormControl>
                         <Helpertext
@@ -173,6 +187,7 @@ const SignUp = () => {
                                 size="large"
                                 sx={{ backgroundColor: "#DD7230", mt: 2 }}
                                 type="submit"
+                                disabled={hasErrors}
                             >
                                 Sign Up
                             </Button>
@@ -183,6 +198,13 @@ const SignUp = () => {
                         </FormControl>
                         <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
                             <Button variant="contained">Facebook</Button>
+                        </FormControl>
+
+                        <FormControl fullWidth sx={{ width: "80%" }}>
+                            <Typography variant="body1">
+                                Already have an account?{" "}
+                                <Link to="/login">Login here</Link>
+                            </Typography>
                         </FormControl>
                     </center>
                 </form>
