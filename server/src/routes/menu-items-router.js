@@ -47,6 +47,34 @@ menuItemsRouter.get("/all", (req, res) => {
     }
 });
 
+// @GET - Menu Item by ID
+menuItemsRouter.get("/id/:menuId", (req, res) => {
+    try {
+        let menuId = req.params?.menuId;
+        if (!menuId || menuId === undefined) {
+            return res
+                .status(400)
+                .send({ success: false, message: "Invalid menu Id" });
+        }
+
+        MenuItemSchema.findOne({ _id: menuId, is_deleted: false })
+            .then((menuItem) => {
+                return res.status(200).send({ success: true, menuItem });
+            })
+            .catch((findErr) => {
+                console.log("Find error:", findErr);
+                return res
+                    .status(500)
+                    .send({ success: false, message: "Some error occured!" });
+            });
+    } catch (error) {
+        console.log("Error in get menu item request;", error);
+        return res
+            .status(400)
+            .send({ success: false, message: "Please try again!" });
+    }
+});
+
 // @PUT - Edit a menu item
 menuItemsRouter.put("/edit/:menuId", (req, res) => {
     try {

@@ -32,6 +32,21 @@ app.use('/user/auth/', userRouter);
 app.use('/menu/', menuItemsRouter);
 app.use('/category', categoryRouter);
 
+// Error handlers middlewares
+app.use((req, res, next) => {
+    const error = new Error('Resource not found');
+    error.status = 404;
+    next(error);
+})
+
+app.use((error, req, res, next) => {
+    res.status(error.status || 500)
+    .send({
+        success: false, 
+        message: error.message || 'Internal server error'
+    });
+})
+
 app.listen(PORT, () => {
     console.log(`Server listening on PORT ${PORT}...`);
 })
