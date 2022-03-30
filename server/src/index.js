@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const PORT = process.env.SERVER_PORT || 5001;
 const userRouter = require('./routes/user-auth-router');
+const menuItemsRouter = require('./routes/menu-items-router');
+const categoryRouter = require('./routes/category-router');
 const cors = require('cors');
 
 const app = express();
@@ -27,6 +29,8 @@ app.use(cors());
 
 // Routers connection
 app.use('/user/auth/', userRouter);
+app.use('/menu/', menuItemsRouter);
+app.use('/category', categoryRouter);
 
 app.listen(PORT, () => {
     console.log(`Server listening on PORT ${PORT}...`);
