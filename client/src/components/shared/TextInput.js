@@ -10,7 +10,8 @@ const TextInput = (props) => {
         value,
         onChange,
         required = true,
-        error = false
+        error = false,
+        size = "medium"
     } = props;
 
     return (
@@ -24,6 +25,7 @@ const TextInput = (props) => {
             name={name}
             sx={{ my: 0.5 }}
             error={error}
+            size={size}
         />
     );
 };
