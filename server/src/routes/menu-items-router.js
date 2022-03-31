@@ -2,6 +2,9 @@ const express = require("express");
 const { menuItemValidator } = require("../middlewares/menu-item-validator");
 const MenuItemSchema = require("../models/MenuItem");
 const menuItemsRouter = express.Router();
+const axios = require("axios");
+const { addJobToQueue } = require("../queue/jobQueue");
+const { v4: uuid4 } = require("uuid");
 
 // @POST - Add a menu item
 menuItemsRouter.post("/add", menuItemValidator, (req, res) => {
@@ -10,6 +13,13 @@ menuItemsRouter.post("/add", menuItemValidator, (req, res) => {
             ...req.body,
         })
             .then((menuItem) => {
+                // Add a job to queue here with menu id, images
+                console.log("First resp", menuItem._id, req.body.images);
+                addJobToQueue({
+                    jobId: uuid4(),
+                    menuId: menuItem._id,
+                    images: req.body.images,
+                });
                 return res.status(201).send({ success: true, menuItem });
             })
             .catch((menuItemErr) => {
