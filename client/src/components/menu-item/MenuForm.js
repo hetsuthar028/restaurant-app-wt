@@ -15,10 +15,12 @@ import {
     FormControlLabel,
     RadioGroup,
     Radio,
+    Box,
 } from "@mui/material";
 import TextInput from "../shared/TextInput";
 import CameraAltRoundedIcon from "@mui/icons-material/CameraAltRounded";
 import axios from "axios";
+import { useSnackbar } from 'notistack';
 
 const initialFormValues = {
     name: "",
@@ -45,6 +47,8 @@ const MenuForm = () => {
 
     const [showIngredientsForm, setShowIngredientsForm] = useState(false);
     const [categoryList, setCategoryList] = useState([]);
+
+    const { enqueueSnackbar } = useSnackbar();
 
     const fetchAllCategories = () => {
         axios
@@ -96,7 +100,7 @@ const MenuForm = () => {
     };
 
     useEffect(() => {
-        console.log("Recipe List Data", recipeList);
+        // console.log("Recipe List Data", recipeList);
     }, [recipeList]);
 
     const handleRecipeRemove = (recipeNumber) => {
@@ -118,7 +122,7 @@ const MenuForm = () => {
     };
 
     const handleAddIngredient = (e) => {
-        console.log("Form values", ingredientForm);
+        // console.log("Form values", ingredientForm);
         setIngredientList({
             ...ingredientList,
             [ingredientForm.name]: ingredientForm.value,
@@ -127,9 +131,39 @@ const MenuForm = () => {
         setShowIngredientsForm(false);
     };
 
-    useEffect(() => {
-        console.log("Ingredient list changed", ingredientList);
-    }, [ingredientList]);
+    const handleIngredientEdit = (ingredient) => {
+        setShowIngredientsForm(true);
+        setIngredientForm({
+            name: ingredient,
+            value: ingredientList[ingredient]
+        })
+    }
+
+    const handleIngredientDelete = (ingredient) => {
+        let tempIngredientList = ingredientList;
+        delete tempIngredientList[ingredient];
+        setIngredientList({...tempIngredientList});
+    }
+
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+
+        console.log({...formValues, ingredients: ingredientList, recipe: recipeList});
+
+        axios.post(`http://localhost:5001/menu/add`, {
+            ...formValues,
+            ingredients: ingredientList,
+            recipe: recipeList
+        })
+        .then((response) => {
+            console.log("Add menu item response:", response.data);
+            return enqueueSnackbar('Menu item added successfully!', { variant: 'success' });
+        })
+        .catch((err) => {
+            console.log("Error in adding menu item:", err?.response?.data);
+            return enqueueSnackbar(err?.response?.data?.message ?? 'Please try again in a while!', { variant: 'error' });
+        })
+    }
 
     return (
         <Grid container>
@@ -145,8 +179,9 @@ const MenuForm = () => {
                     <Chip label="Item Details" />
                 </Divider>
             </Grid>
-
+            <form method="POST" onSubmit={handleFormSubmit}>
             {/* Main Form */}
+            <Grid container>
             <Grid item xs={2} md={2} sm={2}></Grid>
             <Grid item xs={8} md={8} sm={8} my={2} sx={{ px: 2 }}>
                 <FormControl fullWidth sx={{ my: 1 }}>
@@ -177,6 +212,8 @@ const MenuForm = () => {
                         label="Course Type"
                         defaultValue={""}
                         required
+                        name='category'
+                        onChange={handleInputChange}
                     >
                         {categoryList.map((category) => (
                             <MenuItem key={category._id} value={category._id}>
@@ -287,6 +324,7 @@ const MenuForm = () => {
                                         label="Ingredient Name"
                                         name="name"
                                         onChange={handleIngredientInputChange}
+                                        value={ingredientForm.name}
                                     />
                                 </FormControl>
                                 <FormControl sx={{ mx: 1 }}>
@@ -295,6 +333,7 @@ const MenuForm = () => {
                                         placeholder="Amount / quantity"
                                         label="Amount / quantity"
                                         name="value"
+                                        value={ingredientForm.value}
                                         onChange={handleIngredientInputChange}
                                     />
                                 </FormControl>
@@ -324,14 +363,20 @@ const MenuForm = () => {
 
                 {/* Ingredients list */}
                 <Grid container>
-                    <Grid item xs={12} sm={12} md={12}>
                         {Object.keys(ingredientList).map((ingredient, idx) => (
-                            <Typography key={ingredient}>
-                                {ingredient} - {" "}
-                                {ingredientList[ingredient]}
-                            </Typography>
+                            <Grid item xs={12} sm={12} md={4} key={ingredient}>
+                                <Card elevation={2} sx={{p: 1, m: 1}}>
+                                    <Typography sx={{display: "inline"}}>
+                                        {ingredient} - {" "}
+                                        {ingredientList[ingredient]}
+                                    </Typography>
+                                    <Box component="div" sx={{display: "inline"}} textAlign="end">
+                                        <Button onClick={() => handleIngredientEdit(ingredient)}>✏️</Button>
+                                        <Button onClick={() => handleIngredientDelete(ingredient)}>❌</Button>
+                                    </Box>
+                                </Card>
+                            </Grid>
                         ))}
-                    </Grid>
                 </Grid>
 
                 <Divider sx={{ my: 1 }} />
@@ -408,13 +453,15 @@ const MenuForm = () => {
                 sx={{ mt: 2, mb: 2 }}
                 textAlign="center"
             >
-                <Button variant="contained" sx={{ mx: 2 }} size="large">
+                <Button variant="contained" sx={{ mx: 2 }} size="large" type="submit">
                     Add
                 </Button>
                 <Button variant="contained" sx={{ mx: 2 }} size="large">
                     Cancel
                 </Button>
             </Grid>
+            </Grid>
+            </form>
         </Grid>
     );
 };

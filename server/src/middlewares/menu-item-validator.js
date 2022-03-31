@@ -20,7 +20,7 @@ exports.menuItemValidator = (req, res, next) => {
         !price ||
         !category ||
         ingredients.length === 0 ||
-        images.length === 0 ||
+        // images.length === 0 ||
         !preparationTime ||
         !recipe.length === 0 ||
         is_veg === undefined ||
