@@ -19,10 +19,10 @@ exports.menuItemValidator = (req, res, next) => {
         !description ||
         !price ||
         !category ||
-        ingredients.length === 0 ||
+        // ingredients.length === 0 ||
         // images.length === 0 ||
         !preparationTime ||
-        !recipe.length === 0 ||
+        // !recipe.length === 0 ||
         is_veg === undefined ||
         is_jain === undefined ||
         available === undefined
@@ -33,12 +33,12 @@ exports.menuItemValidator = (req, res, next) => {
         });
     }
 
-    if (description.toString().length > 200) {
-        return res.status(400).send({
-            success: false,
-            message: "Description must be shorter than 200 characters",
-        });
-    }
+    // if (description.toString().length > 200) {
+    //     return res.status(400).send({
+    //         success: false,
+    //         message: "Description must be shorter than 200 characters",
+    //     });
+    // }
 
     next();
 };
