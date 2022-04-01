@@ -69,6 +69,11 @@ const Home = () => {
         });
     };
 
+    const handleSortingChange = (e) => {
+        const {name, value} = e.target;
+
+    }
+
     useEffect(() => {
         console.log("Filters", filters);
         fetchAllItems();
@@ -86,6 +91,7 @@ const Home = () => {
                             placeholder="Search Food Items"
                             label="Search Food Items"
                             name="query"
+                            size="small"
                             value={filters.query}
                             onChange={handleFilterChange}
                         />
@@ -94,14 +100,32 @@ const Home = () => {
                 <Grid item xs={12} md={6} sm={6} textAlign="end" sx={{ p: 2 }}>
                     <FormControl sx={{ minWidth: 120, mx: 1 }}>
                         <InputLabel id="demo-simple-select-label">
+                            Price
+                        </InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            // value={availability}
+                            label="Price"
+                            name="price"
+                            size='small'
+                            onChange={handleFilterChange}
+                        >
+                            <MenuItem value={0}>-</MenuItem>
+                            <MenuItem value={1}>Low to High</MenuItem>
+                            <MenuItem value={-1}>High to Low</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl sx={{ minWidth: 120, mx: 1 }}>
+                        <InputLabel id="demo-simple-select-label">
                             Availability
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={availability}
-                            defaultValue={""}
                             label="Availability"
+                            size='small'
                             name="available"
                             onChange={handleFilterChange}
                         >
@@ -119,6 +143,7 @@ const Home = () => {
                             id="demo-simple-select"
                             label="Course"
                             name="category"
+                            size='small'
                             onChange={handleFilterChange}
                         >
                             <MenuItem value={"all"}>All</MenuItem>
@@ -140,6 +165,7 @@ const Home = () => {
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             label="Veg or Non-veg"
+                            size='small'
                             name="is_veg"
                             onChange={handleFilterChange}
                         >

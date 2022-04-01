@@ -39,7 +39,7 @@ menuItemsRouter.post("/add", menuItemValidator, (req, res) => {
 // @GET - All menu items
 menuItemsRouter.get("/all", (req, res) => {
     try {
-        let {available, is_veg, category, query} = req.query;
+        let {available, is_veg, category, query, price} = req.query;
         
         // Availability filter
         if(available === 'true'){
@@ -65,6 +65,10 @@ menuItemsRouter.get("/all", (req, res) => {
             // $text: {$search: query}, // [2nd approach - text index | Drawback - can't do partial search]
             name: new RegExp(`.*${query}.*`, 'gi'),
         }
+
+        const sortingFilter = {
+            price: price,
+        }
         if(available === 'all' || available === undefined){
             delete filters['available'];
         }
@@ -77,10 +81,14 @@ menuItemsRouter.get("/all", (req, res) => {
         if(query === '' || query === undefined){
             delete filters['name'];
         }
+        if(price === '' || price === '0' || price === undefined){
+            delete sortingFilter['price'];
+        }
+
         console.log("Filters", filters);
 
         MenuItemSchema.ensureIndexes({name: 'text'});
-        MenuItemSchema.find({ is_deleted: false, ...filters })
+        MenuItemSchema.find({ is_deleted: false, ...filters }).sort({...sortingFilter})
             .then((menuItems) => {
                 console.log("Total records sent:", menuItems.length);
                 return res.status(200).send({ success: true, menuItems });
