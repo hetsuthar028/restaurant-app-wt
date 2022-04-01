@@ -6,6 +6,8 @@ const axios = require("axios");
 const { addJobToQueue } = require("../queue/jobQueue");
 const { v4: uuid4 } = require("uuid");
 
+const PAGE_SIZE = 4;
+
 // @POST - Add a menu item
 menuItemsRouter.post("/add", menuItemValidator, (req, res) => {
     try {
@@ -39,7 +41,7 @@ menuItemsRouter.post("/add", menuItemValidator, (req, res) => {
 // @GET - All menu items
 menuItemsRouter.get("/all", (req, res) => {
     try {
-        let {available, is_veg, category, query, price} = req.query;
+        let {available, is_veg, category, query, price, size, page} = req.query;
         
         // Availability filter
         if(available === 'true'){
@@ -84,13 +86,35 @@ menuItemsRouter.get("/all", (req, res) => {
         if(price === '' || price === '0' || price === undefined){
             delete sortingFilter['price'];
         }
+        if(page === undefined){
+            page = 0
+        }
+        if(size === undefined){
+            size = PAGE_SIZE;
+        }
 
         console.log("Filters", filters);
+
+        size = parseInt(size);
+        page = parseInt(page);
+
+        if(size < 0 || page < 0){
+            return res.status(400).send({success: false, message: "Invalid pagination request"});
+        }
+
 
         MenuItemSchema.ensureIndexes({name: 'text'});
         MenuItemSchema.find({ is_deleted: false, ...filters }).sort({...sortingFilter})
             .then((menuItems) => {
                 console.log("Total records sent:", menuItems.length);
+                
+                // MenuItemSchema.count({is_deleted: false, ...filters})
+                //     .then((totalCount) => {
+                //         console.log("Total Count", totalCount);
+                //         let totalPages = Math.ceil(totalCount / size);
+                        
+                //     })
+
                 return res.status(200).send({ success: true, menuItems });
             })
             .catch((findErr) => {
