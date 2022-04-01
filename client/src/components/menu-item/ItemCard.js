@@ -3,7 +3,6 @@ import { Card, Grid, Typography, Button } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 
 const ItemCard = (props) => {
-
     const { menuItem } = props;
 
     return (
@@ -26,14 +25,18 @@ const ItemCard = (props) => {
                     textAlign="end"
                 >
                     <CircleIcon
-                        sx={{ width: "25px", height: "25px", color: menuItem.is_veg ? 'green': 'red' }}
+                        sx={{
+                            width: "25px",
+                            height: "25px",
+                            color: menuItem.is_veg ? "green" : "red",
+                        }}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={12} sm={12}>
                     <img
-                        // src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Nnx8Zm9vZHxlbnwwfHwwfHw%3D"
-                        src={menuItem.images[0]}
+                        src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Nnx8Zm9vZHxlbnwwfHwwfHw%3D"
+                        // src={menuItem.images[0]}
                         style={{ height: "200px", width: "100%" }}
                     />
                 </Grid>
@@ -46,9 +49,7 @@ const ItemCard = (props) => {
 
                 <Grid item xs={12} md={12} sm={12} sx={{ px: 2, py: 1 }}>
                     <Typography variant="subtitle2">
-                        {/* Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                        sed do eiusmod tempor incididunt ut labore... */}
-                        {menuItem.description}
+                        {`${menuItem.description.slice(0, 120)}...`}
                     </Typography>
                 </Grid>
             </Grid>

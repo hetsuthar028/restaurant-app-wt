@@ -11,25 +11,23 @@ import {
 import ItemCard from "../menu-item/ItemCard";
 import TextInput from "../shared/TextInput";
 import axios from "axios";
+import CategorySection from "./CategorySection";
 
 const Home = () => {
-    const [age, setAge] = React.useState("");
     const [filters, setFilters] = useState({});
     const [allItems, setAllItems] = useState([]);
-    const [filteredItems, setFilteredItems] = useState([]);
     const [allCategories, setAllCategories] = useState([]);
 
     const fetchAllItems = () => {
         axios
             .get(`http://localhost:5001/menu/all`, {
                 params: {
-                    ...filters
-                }
+                    ...filters,
+                },
             })
             .then((response) => {
-                console.log("All menu items:", response.data.menuItems);
+                // console.log("All menu items:", response.data.menuItems);
                 setAllItems(response.data.menuItems);
-                setFilteredItems(response.data.menuItems);
             })
             .catch((err) => {
                 console.log(
@@ -43,7 +41,7 @@ const Home = () => {
         axios
             .get(`http://localhost:5001/category/all`)
             .then((response) => {
-                console.log("All categories:", response.data.categories);
+                // console.log("All categories:", response.data.categories);
                 setAllCategories(response.data.categories);
             })
             .catch((err) => {
@@ -69,19 +67,11 @@ const Home = () => {
         });
     };
 
-    const handleSortingChange = (e) => {
-        const {name, value} = e.target;
-
-    }
-
     useEffect(() => {
-        console.log("Filters", filters);
+        // console.log("Filters", filters);
         fetchAllItems();
     }, [filters]);
 
-    const handleChange = (event) => {
-        setAge(event.target.value);
-    };
     return (
         <Grid container>
             <Grid container>
@@ -108,7 +98,7 @@ const Home = () => {
                             // value={availability}
                             label="Price"
                             name="price"
-                            size='small'
+                            size="small"
                             onChange={handleFilterChange}
                         >
                             <MenuItem value={0}>-</MenuItem>
@@ -125,7 +115,7 @@ const Home = () => {
                             id="demo-simple-select"
                             // value={availability}
                             label="Availability"
-                            size='small'
+                            size="small"
                             name="available"
                             onChange={handleFilterChange}
                         >
@@ -143,7 +133,7 @@ const Home = () => {
                             id="demo-simple-select"
                             label="Course"
                             name="category"
-                            size='small'
+                            size="small"
                             onChange={handleFilterChange}
                         >
                             <MenuItem value={"all"}>All</MenuItem>
@@ -165,7 +155,7 @@ const Home = () => {
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             label="Veg or Non-veg"
-                            size='small'
+                            size="small"
                             name="is_veg"
                             onChange={handleFilterChange}
                         >
@@ -177,35 +167,13 @@ const Home = () => {
                 </Grid>
             </Grid>
             {allCategories.map((category) => (
-                <Grid item xs={12} md={12} sm={12} key={category._id}>
-                    <Typography
-                        fontFamily="Bebas Neue"
-                        variant="h4"
-                        textAlign="center"
-                        my={1}
-                    >
-                        {category.name}
-                    </Typography>
-                    <Divider sx={{ mx: 2 }} />
-
-                    <Grid container>
-                        {allItems.map(
-                            (menuItem) =>
-                                category._id === menuItem.category && (
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        sm={4}
-                                        md={3}
-                                        sx={{ p: 2 }}
-                                        key={menuItem._id}
-                                    >
-                                        <ItemCard menuItem={menuItem} />
-                                    </Grid>
-                                )
-                        )}
-                    </Grid>
-                </Grid>
+                <CategorySection
+                    items={allItems.filter(
+                        (menuItem) => category._id === menuItem.category
+                    )}
+                    category={category}
+                    key={category._id}
+                />
             ))}
         </Grid>
     );
