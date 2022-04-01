@@ -39,8 +39,50 @@ menuItemsRouter.post("/add", menuItemValidator, (req, res) => {
 // @GET - All menu items
 menuItemsRouter.get("/all", (req, res) => {
     try {
-        MenuItemSchema.find({ is_deleted: false })
+        let {available, is_veg, category, query} = req.query;
+        
+        // Availability filter
+        if(available === 'true'){
+            available = true;
+        }
+        else if (available === 'false') {
+            available = false;
+        }
+        
+        // is_veg filter
+        if(is_veg === 'true'){
+            is_veg = true;
+        }
+        else if (is_veg === 'false') {
+            is_veg = false;
+        }
+
+        let filters = {
+            available,
+            is_veg,
+            category,
+            // name : `/${query}/`, // [1st approach]
+            // $text: {$search: query}, // [2nd approach - text index | Drawback - can't do partial search]
+            name: new RegExp(`.*${query}.*`, 'gi'),
+        }
+        if(available === 'all' || available === undefined){
+            delete filters['available'];
+        }
+        if(is_veg === 'all' || is_veg === undefined){
+            delete filters['is_veg'];
+        }
+        if(category === 'all' || category === undefined){
+            delete filters['category'];
+        }
+        if(query === '' || query === undefined){
+            delete filters['name'];
+        }
+        console.log("Filters", filters);
+
+        MenuItemSchema.ensureIndexes({name: 'text'});
+        MenuItemSchema.find({ is_deleted: false, ...filters })
             .then((menuItems) => {
+                console.log("Total records sent:", menuItems.length);
                 return res.status(200).send({ success: true, menuItems });
             })
             .catch((findErr) => {

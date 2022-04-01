@@ -21,7 +21,11 @@ const Home = () => {
 
     const fetchAllItems = () => {
         axios
-            .get(`http://localhost:5001/menu/all`)
+            .get(`http://localhost:5001/menu/all`, {
+                params: {
+                    ...filters
+                }
+            })
             .then((response) => {
                 console.log("All menu items:", response.data.menuItems);
                 setAllItems(response.data.menuItems);
@@ -67,6 +71,7 @@ const Home = () => {
 
     useEffect(() => {
         console.log("Filters", filters);
+        fetchAllItems();
     }, [filters]);
 
     const handleChange = (event) => {
@@ -80,7 +85,9 @@ const Home = () => {
                         <TextInput
                             placeholder="Search Food Items"
                             label="Search Food Items"
-                            name="itemFilter"
+                            name="query"
+                            value={filters.query}
+                            onChange={handleFilterChange}
                         />
                     </FormControl>
                 </Grid>
@@ -95,7 +102,7 @@ const Home = () => {
                             // value={availability}
                             defaultValue={""}
                             label="Availability"
-                            name="availability"
+                            name="available"
                             onChange={handleFilterChange}
                         >
                             <MenuItem value={"all"}>All</MenuItem>
