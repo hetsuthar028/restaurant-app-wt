@@ -56,10 +56,15 @@ uploadImageRouter.post('/cache', uploader.array('itemImage', 7), (req, res) => {
 
 uploadImageRouter.post('/bucket', (req, res) => {
     try {
-        let { files, location } = req.body;
+        let { files, location, existingImages = [] } = req.body;
         let fileURLs = [];
 
-        console.log("FILES", files);
+        console.log("FILES", files, existingImages);
+
+        if(files.length === 0){
+            console.log("Zero files");
+            return res.status(201).send({success: true, fileURLs: [...existingImages, ...fileURLs]});
+        }
 
         files.map(async (fileName, idx) => {
             const storageRef = ref(storage, `${location}/${uuid4()}.png`);
@@ -80,7 +85,7 @@ uploadImageRouter.post('/bucket', (req, res) => {
                 })
             if(Object.keys(fileURLs).length === files.length){
                 console.log("REturning", fileURLs);
-                return res.status(201).send({success: true, fileURLs});
+                return res.status(201).send({success: true, fileURLs: [...existingImages, ...fileURLs]});
             }
         })
 

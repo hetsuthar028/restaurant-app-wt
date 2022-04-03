@@ -27,6 +27,7 @@ exports.menuItemValidator = (req, res, next) => {
         is_jain === undefined ||
         available === undefined
     ) {
+        console.log("Category", category, name, description, price, preparationTime, is_veg, is_jain, available)
         return res.status(400).send({
             success: false,
             message: "Please check all the fields and try again!",

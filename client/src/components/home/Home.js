@@ -7,16 +7,39 @@ import {
     Select,
     InputLabel,
     MenuItem,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from "@mui/material";
 import ItemCard from "../menu-item/ItemCard";
 import TextInput from "../shared/TextInput";
 import axios from "axios";
 import CategorySection from "./CategorySection";
+import { makeStyles } from "@mui/styles";
+import { useSnackbar } from 'notistack';
+
+const useStyles = makeStyles({
+    input: {
+        color: "#ccc",
+        borderColor: "#ccc",
+    },
+    multilineColor: {
+        color: "red",
+    },
+});
 
 const Home = () => {
+    const classes = useStyles();
     const [filters, setFilters] = useState({});
     const [allItems, setAllItems] = useState([]);
     const [allCategories, setAllCategories] = useState([]);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [toDeleteItem, setToDeleteItem] = useState('');
+
+    const { enqueueSnackbar } = useSnackbar();
 
     const fetchAllItems = () => {
         axios
@@ -66,6 +89,35 @@ const Home = () => {
             [name]: value,
         });
     };
+
+    const handleOpenDeleteDialog = (itemId) => {
+        setOpenDeleteDialog(true);
+        setToDeleteItem(itemId);
+    }
+
+    const handleCloseDeleteDialog = () => {
+        setOpenDeleteDialog(false);
+        setToDeleteItem('');
+    }
+
+    const handleItemDelete = () => {
+        axios.delete(`http://localhost:5001/menu/delete/${toDeleteItem}`)
+            .then((deleteResp) => {
+                console.log("Delete response:", deleteResp);
+                handleCloseDeleteDialog();
+                fetchAllItems();
+                if(deleteResp.data.deleteResp.modifiedCount === 1){
+                    return enqueueSnackbar('Menu item deleted successfully!', { variant: 'warning' });
+                } else {
+                    return enqueueSnackbar('Oops! Menu item can\'t be delete, Please try again!', { variant: 'warning' });
+                }
+            })
+            .catch((deleteErr) => {
+                console.log("Error in delete:", deleteErr);
+                handleCloseDeleteDialog();
+                return enqueueSnackbar('Oops! Menu item can\'t be delete, Please try again!', { variant: 'warning' });
+            })
+    }
 
     useEffect(() => {
         // console.log("Filters", filters);
@@ -173,8 +225,34 @@ const Home = () => {
                     )}
                     category={category}
                     key={category._id}
+                    handleOpenDeleteDialog={handleOpenDeleteDialog}
                 />
             ))}
+
+            {/* Delete item dialog */}
+            <Dialog
+                open={openDeleteDialog}
+                onClose={() => setOpenDeleteDialog(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Delete a menu item?"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Click on delete button to remove this menu item from the
+                        list. Doing this will remove item from records and won't
+                        be available later!
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+                    <Button onClick={() => handleItemDelete()} autoFocus>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Grid>
     );
 };

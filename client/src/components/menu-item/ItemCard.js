@@ -1,9 +1,23 @@
-import React from "react";
-import { Card, Grid, Typography, Button } from "@mui/material";
+import React, { useState } from "react";
+import {
+    Card,
+    Grid,
+    Typography,
+    Button,
+} from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
+import { useNavigate } from "react-router-dom";
 
 const ItemCard = (props) => {
-    const { menuItem } = props;
+    const { menuItem, handleOpenDeleteDialog } = props;
+    const navigate = useNavigate();
+    
+
+    const handleEdit = (menuId) => {
+        navigate("/menu/add", {
+            state: { edit: true, menuId: menuId, menuItem: menuItem },
+        });
+    };
 
     return (
         // sx={{ border: "1.5px #F4C95D solid" }}
@@ -42,8 +56,31 @@ const ItemCard = (props) => {
                 </Grid>
 
                 <Grid item xs={12} md={12} sm={12} sx={{ pl: 2, py: 1 }}>
-                    <Button variant="contained" size="small">
+                    <Button variant="contained" size="small" sx={{ mx: 1 }}>
                         ₹{menuItem.price}/-
+                    </Button>
+
+                    {/* Only if the user is admin */}
+                    <Button
+                        variant="contained"
+                        size="small"
+                        sx={{ backgroundColor: "#854D27", mx: 1 }}
+                    >
+                        <Typography
+                            fontFamily="Bartender SmCond Serif Pressed"
+                            onClick={() => handleEdit(menuItem._id)}
+                        >
+                            Edit
+                        </Typography>
+                    </Button>
+                    <Button
+                        variant="contained"
+                        size="small"
+                        sx={{ backgroundColor: "#DD7230", mx: 1 }}
+                    >
+                        <Typography fontFamily="Bartender SmCond Serif Pressed" onClick={() => handleOpenDeleteDialog(menuItem._id)}>
+                            Delete
+                        </Typography>
                     </Button>
                 </Grid>
 

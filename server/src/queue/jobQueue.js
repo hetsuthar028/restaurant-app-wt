@@ -6,12 +6,13 @@ const NUM_WORKERS = 5;
 // Upload images
 jobQueue.process(NUM_WORKERS, async ({ data }) => {
     console.log("Inside JQ", data);
-    let { jobId, menuId, images } = data;
+    let { jobId, menuId, images, existingImages = [] } = data;
     // console.log("INSIDE JQ 3", jobId, menuId, images);
     axios
         .post("http://localhost:5001/upload/bucket", {
             files: images,
             location: "/items",
+            existingImages: existingImages,
         })
         .then((uploadResp) => {
             console.log("Upload resp", uploadResp.data);

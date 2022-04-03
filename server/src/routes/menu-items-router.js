@@ -176,6 +176,15 @@ menuItemsRouter.put("/edit/:menuId", (req, res) => {
             }
         )
             .then((menuItem) => {
+                // console.log("Existing images", req.body.existingImages ?? []);
+                if(req.body.images && req.body.name){
+                    addJobToQueue({
+                        jobId: uuid4(),
+                        menuId: menuId,
+                        images: req.body.images,
+                        existingImages: req.body.existingImages ?? []
+                    });
+                }
                 return res.status(200).send({ success: true, menuItem });
             })
             .catch((menuItemErr) => {

@@ -22,6 +22,7 @@ import CameraAltRoundedIcon from "@mui/icons-material/CameraAltRounded";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import "./MenuForm.css";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const initialFormValues = {
     name: "",
@@ -39,11 +40,6 @@ const initialIngredientForm = {
     value: "",
 };
 
-const imageDataFormat = {
-    fileData: {},
-    cacheFilename: "",
-};
-
 const MenuForm = () => {
     const [formValues, setFormValues] = useState(initialFormValues);
     const [recipeListCount, setRecipeListCount] = useState(1);
@@ -53,13 +49,15 @@ const MenuForm = () => {
     const [uploadedImages, setUploadedImages] = useState({});
 
     const [tempImage, setTempImage] = useState([]);
-    const [imageURL, setImageURL] = useState([]);
     const [showIngredientsForm, setShowIngredientsForm] = useState(false);
     const [categoryList, setCategoryList] = useState([]);
 
     const [allImages, setAllImages] = useState([]);
+    const [editMode, setEditMode] = useState(false);
 
     const { enqueueSnackbar } = useSnackbar();
+    const location = useLocation();
+    const navigate = useNavigate();
 
     const fetchAllCategories = () => {
         axios
@@ -74,6 +72,18 @@ const MenuForm = () => {
 
     useEffect(() => {
         fetchAllCategories();
+
+        // If form is opened for editing
+        if (location.state === null) {
+            return;
+        }
+
+        let { edit, menuItem } = location.state;
+        setEditMode(edit ?? false);
+        setFormValues({ ...(menuItem ?? initialFormValues) });
+        setRecipeListCount(menuItem.recipe.length ?? 0);
+        setRecipeList(menuItem.recipe ?? []);
+        setIngredientList(menuItem.ingredients ?? {});
     }, []);
 
     const handleInputChange = (e) => {
@@ -110,10 +120,6 @@ const MenuForm = () => {
         setRecipeList([...tempRecipeList]);
     };
 
-    useEffect(() => {
-        // console.log("Recipe List Data", recipeList);
-    }, [recipeList]);
-
     const handleRecipeRemove = (recipeNumber) => {
         let tempRecipeList = recipeList;
         if (recipeListCount !== 1) {
@@ -133,7 +139,6 @@ const MenuForm = () => {
     };
 
     const handleAddIngredient = (e) => {
-        // console.log("Form values", ingredientForm);
         setIngredientList({
             ...ingredientList,
             [ingredientForm.name]: ingredientForm.value,
@@ -161,13 +166,9 @@ const MenuForm = () => {
         console.log(files);
 
         const imagesFormData = new FormData();
-        // imagesFormData.append('itemImage', files[0]);
         Object.keys(files).map((key) => {
             imagesFormData.append("itemImage", files[key]);
         });
-        // files.map((file) => {
-        //     imagesFormData.append('itemImage', file);
-        // })
 
         axios
             .post(`http://localhost:5001/upload/cache`, imagesFormData, {
@@ -181,7 +182,6 @@ const MenuForm = () => {
                 let someArr = [];
 
                 Object.keys(files).forEach((key, idx) => {
-                    console.log("SS", uploadedImages);
                     let tempList2 = {};
                     tempList[files[key].name] = response.data.filesNames[idx];
                     tempList2 = {
@@ -199,10 +199,11 @@ const MenuForm = () => {
                         response.data.filesNames.length
                     ) {
                         setUploadedImages({
+                            ...uploadedImages,
                             ...tempList,
                         });
 
-                        setAllImages([...someArr]);
+                        setAllImages([...allImages, ...someArr]);
                     }
                 });
             })
@@ -210,27 +211,8 @@ const MenuForm = () => {
                 console.log("Error from cache upload:", error?.response);
             });
 
-        // console.log("Form Data", imagesFormData);
         setTempImage([...files]);
     };
-
-    useEffect(() => {
-        const newTempList = [];
-        console.log("TEMP IMAGE", tempImage);
-        tempImage.forEach((image) =>
-            newTempList.push(URL.createObjectURL(image))
-        );
-        // console.log("NEW LIST", newTempList);
-        setImageURL([...newTempList]);
-    }, [tempImage]);
-
-    useEffect(() => {
-        console.log("Uploaded images", uploadedImages);
-    }, [uploadedImages]);
-
-    useEffect(() => {
-        console.log("ALl IMAGES Data", allImages);
-    }, [allImages]);
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
@@ -241,33 +223,72 @@ const MenuForm = () => {
             recipe: recipeList,
         });
 
-        axios
-            .post(`http://localhost:5001/menu/add`, {
-                ...formValues,
-                ingredients: ingredientList,
-                recipe: recipeList,
-                images: allImages.map((file) => file.cacheFile),
-            })
-            .then((response) => {
-                console.log("Add menu item response:", response.data);
-                return enqueueSnackbar("Menu item added successfully!", {
-                    variant: "success",
+        if (editMode) {
+            axios
+                .put(`http://localhost:5001/menu/edit/${formValues._id}`, {
+                    ...formValues,
+                    ingredients: ingredientList,
+                    recipe: recipeList,
+                    images: allImages.map((file) => file.cacheFile),
+                    existingImages: [...formValues.images],
+                })
+                .then((editResp) => {
+                    console.log("Edit Response", editResp.data);
+                    enqueueSnackbar("Menu item edited successfully!", {
+                        variant: "success",
+                    });
+                    return navigate("/home");
+                })
+                .catch((editErr) => {
+                    console.log("Error in Edit:", editErr?.response?.data);
+                    return enqueueSnackbar(
+                        editErr?.response?.data?.message ??
+                            "Please try again in a while!",
+                        { variant: "error" }
+                    );
                 });
-            })
-            .catch((err) => {
-                console.log("Error in adding menu item:", err?.response?.data);
-                return enqueueSnackbar(
-                    err?.response?.data?.message ??
-                        "Please try again in a while!",
-                    { variant: "error" }
-                );
-            });
+        } else {
+            axios
+                .post(`http://localhost:5001/menu/add`, {
+                    ...formValues,
+                    ingredients: ingredientList,
+                    recipe: recipeList,
+                    images: allImages.map((file) => file.cacheFile),
+                })
+                .then((response) => {
+                    console.log("Add menu item response:", response.data);
+                    enqueueSnackbar("Menu item added successfully!", {
+                        variant: "success",
+                    });
+                    return navigate("/home");
+                })
+                .catch((err) => {
+                    console.log(
+                        "Error in adding menu item:",
+                        err?.response?.data
+                    );
+                    return enqueueSnackbar(
+                        err?.response?.data?.message ??
+                            "Please try again in a while!",
+                        { variant: "error" }
+                    );
+                });
+        }
     };
 
-    const handleImageDelete = (idx) => {
-        let tempImages = allImages;
-        tempImages.splice(idx, 1);
-        setAllImages([...tempImages]);
+    const handleImageDelete = (idx, mode = 0) => {
+        if (mode === 0) {
+            let tempImages = allImages;
+            tempImages.splice(idx, 1);
+            setAllImages([...tempImages]);
+        } else {
+            let tempImages = formValues.images;
+            tempImages.splice(idx, 1);
+            setFormValues({
+                ...formValues,
+                images: [...tempImages],
+            });
+        }
     };
 
     return (
@@ -278,7 +299,7 @@ const MenuForm = () => {
                     fontFamily="Bebas Neue"
                     textAlign="center"
                 >
-                    Add a Menu Item
+                    {editMode ? "Edit" : "Add"} a Menu Item
                 </Typography>
                 <Divider sx={{ my: 1 }}>
                     <Chip label="Item Details" />
@@ -318,6 +339,7 @@ const MenuForm = () => {
                                 defaultValue={""}
                                 required
                                 name="category"
+                                value={formValues.category ?? ""}
                                 onChange={handleInputChange}
                             >
                                 {categoryList.map((category) => (
@@ -642,6 +664,37 @@ const MenuForm = () => {
                     ))}
                 </Grid> */}
                         <Grid container>
+                            {editMode &&
+                                formValues.images.map((imageUrl, idx) => (
+                                    <Card
+                                        className="container"
+                                        key={idx}
+                                        elevation={3}
+                                        sx={{ m: 2 }}
+                                    >
+                                        <img
+                                            src={imageUrl}
+                                            key={idx}
+                                            className="uploadedImage"
+                                            style={{
+                                                height: "200px",
+                                                width: "200px",
+                                            }}
+                                        />
+                                        <div className="overlay">
+                                            <Button
+                                                className="text"
+                                                size="large"
+                                                sx={{ fontSize: "30px" }}
+                                                onClick={() =>
+                                                    handleImageDelete(idx, 1)
+                                                }
+                                            >
+                                                ❌
+                                            </Button>
+                                        </div>
+                                    </Card>
+                                ))}
                             {allImages.map((imageData, idx) => (
                                 <Card
                                     className="container"
@@ -666,7 +719,7 @@ const MenuForm = () => {
                                             size="large"
                                             sx={{ fontSize: "30px" }}
                                             onClick={() =>
-                                                handleImageDelete(idx)
+                                                handleImageDelete(idx, 0)
                                             }
                                         >
                                             ❌
@@ -694,9 +747,14 @@ const MenuForm = () => {
                             size="large"
                             type="submit"
                         >
-                            Add
+                            {editMode ? "Edit" : "Add"}
                         </Button>
-                        <Button variant="contained" sx={{ mx: 2 }} size="large">
+                        <Button
+                            variant="contained"
+                            sx={{ mx: 2 }}
+                            size="large"
+                            onClick={() => navigate("/home")}
+                        >
                             Cancel
                         </Button>
                     </Grid>

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const NotFoundPage = () => {
     return (
-        <Grid container>
+        <Grid container sx={{background: `url(https://images.unsplash.com/photo-1554050857-c84a8abdb5e2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=327&q=80)`}}>
             <Grid
                 item
                 xs={12}
@@ -23,10 +23,10 @@ const NotFoundPage = () => {
                         src="https://cdn.pixabay.com/photo/2014/12/21/23/56/hamburger-576419__340.png"
                         style={{ height: "300px", width: "300px" }}
                     />
-                    <Typography fontFamily="Bebas Neue" variant="h1">
+                    <Typography fontFamily="Bartender SmCond Serif Pressed" variant="h1" sx={{color: '#ccc'}}>
                         404
                     </Typography>
-                    <Typography fontFamily="lato" variant="h3">
+                    <Typography fontFamily="Bartender SmCond Serif Pressed" variant="h3" sx={{color: '#ccc'}}>
                         That page doesn't exist!
                     </Typography>
                     <Typography fontFamily="lato" variant="h6" color="GrayText">
@@ -37,7 +37,7 @@ const NotFoundPage = () => {
                             to="/home"
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
-                            <Typography fontFamily="lato" variant="h5">
+                            <Typography fontFamily="Bartender SmCond Serif Pressed" variant="h3">
                                 Visit Home
                             </Typography>
                         </Link>
