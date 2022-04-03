@@ -7,23 +7,32 @@ const jwt = require("jsonwebtoken");
 // Middleware
 const { userDataValidator } = require("../middlewares/user-validator");
 const { vertifyToken } = require("../middlewares/verify-token");
-
-userRouter.get("/", (req, res) => {
-    res.send("Welcome");
-});
+const { verifyMyToken } = require("../middlewares/validate-token");
 
 // @POST - User registration
 userRouter.post("/signup", userDataValidator, (req, res) => {
     try {
-        const { username, email, password, role = "re.user" } = req.body;
+        const {
+            username,
+            email,
+            password,
+            role = "re.user",
+            auth_type = "normal",
+            is_admin = false,
+            profile_url = "",
+        } = req.body;
 
         let salt = bcrypt.genSaltSync(10);
         let hashedPassword = bcrypt.hashSync(password, salt);
+
         let newUser = new UserSchema({
             username,
             email,
             password: hashedPassword,
             role,
+            profile_url,
+            auth_type,
+            is_admin,
         });
 
         UserSchema.findOne({
@@ -61,8 +70,8 @@ userRouter.post("/signup", userDataValidator, (req, res) => {
 // @POST - User login
 userRouter.post("/login", (req, res) => {
     try {
-        let { email, password } = req.body;
-        UserSchema.findOne({ email: email })
+        let { email, password, auth_type = "normal" } = req.body;
+        UserSchema.findOne({ email: email, auth_type })
             .then((user) => {
                 if (user === null) {
                     return res.status(400).send({
@@ -95,11 +104,47 @@ userRouter.post("/login", (req, res) => {
     }
 });
 
+// @POST - Google Sign In
+userRouter.post("/google/signin", (req, res) => {
+    try {
+        let { email, profile_url, username } = req.body;
+        let salt = bcrypt.genSaltSync(10);
+        let defaultEncryptedPassword = bcrypt.hashSync("Foodie$28", salt);
+
+        UserSchema.updateOne(
+            { email: email, is_deleted: false },
+            {
+                $set: {
+                    email,
+                    profile_url,
+                    password: defaultEncryptedPassword,
+                    is_admin: false,
+                    username,
+                    auth_type: "google",
+                },
+            },
+            { upsert: true }
+        )
+            .then((user) => {
+                return res.status(201).send({ success: true, user });
+            })
+            .catch((err) => {
+                console.log("Error in google login:", err);
+            });
+    } catch (error) {
+        console.log("Error in G Sign In", error);
+    }
+});
+
 // @GET - Current user
-userRouter.get("/currentuser", vertifyToken, (req, res) => {
+userRouter.get("/currentuser", verifyMyToken, (req, res) => {
+    let auth_type = req.auth_type; // normal, google, facebook
     let userId = req.userId;
 
-    UserSchema.findById({ _id: userId }, {password: 0})
+    const userFilters =
+        auth_type === "normal" ? { _id: userId } : { email: req.email };
+
+    UserSchema.findOne({ ...userFilters }, { password: 0 })
         .then((user) => {
             if (!user) {
                 return res

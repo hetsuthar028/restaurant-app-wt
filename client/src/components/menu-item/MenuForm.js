@@ -70,7 +70,33 @@ const MenuForm = () => {
             });
     };
 
-    useEffect(() => {
+    const verifyCurrentUser = async () => {
+        try {
+            let response = await axios.get(
+                `http://localhost:5001/user/auth/currentuser`,
+                {
+                    headers: {
+                        authorization: window.localStorage.getItem("bearer"),
+                    },
+                }
+            );
+            console.log("Response in Home", response.data);
+            if (!response.data.user.is_admin) {
+                enqueueSnackbar("Unauthorized access", { variant: "warning" });
+                return navigate("/home");
+            }
+            return;
+        } catch (error) {
+            console.log("Error fetching current user in home:", error);
+            enqueueSnackbar("Please login to view home page!", {
+                variant: "error",
+            });
+            return navigate("/login");
+        }
+    };
+
+    useEffect(async () => {
+        await verifyCurrentUser();
         fetchAllCategories();
 
         // If form is opened for editing
@@ -648,21 +674,7 @@ const MenuForm = () => {
                         >
                             <CameraAltRoundedIcon />
                         </Button>
-                        {/* <Grid container>
-                    {imageURL.map((imgSrc, idx) => (
-                        <Card className="container" key={idx} elevation={3} sx={{m: 2}}>
-                            <img
-                                src={imgSrc}
-                                key={idx}
-                                className='uploadedImage'
-                                style={{height: '200px', width: '200px'}}
-                            />
-                            <div className="overlay">
-                                <Button className="text" size="large" sx={{fontSize: '30px'}} onClick={handleImageDelete}>❌</Button>
-                            </div>
-                    </Card>
-                    ))}
-                </Grid> */}
+
                         <Grid container>
                             {editMode &&
                                 formValues.images.map((imageUrl, idx) => (

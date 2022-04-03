@@ -5,7 +5,7 @@ import ItemCard from "../menu-item/ItemCard";
 const RECORDS_PER_PAGE = 4;
 
 const CategorySection = (props) => {
-    const { items, category, handleOpenDeleteDialog } = props;
+    const { items, category, handleOpenDeleteDialog, isAdmin } = props;
 
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -49,7 +49,13 @@ const CategorySection = (props) => {
                                 sx={{ p: 2 }}
                                 key={menuItem._id}
                             >
-                                <ItemCard menuItem={menuItem} handleOpenDeleteDialog={handleOpenDeleteDialog} />
+                                <ItemCard
+                                    menuItem={menuItem}
+                                    handleOpenDeleteDialog={
+                                        handleOpenDeleteDialog
+                                    }
+                                    isAdmin={isAdmin}
+                                />
                             </Grid>
                         ))}
                 </Grid>

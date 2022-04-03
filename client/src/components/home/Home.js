@@ -19,7 +19,8 @@ import TextInput from "../shared/TextInput";
 import axios from "axios";
 import CategorySection from "./CategorySection";
 import { makeStyles } from "@mui/styles";
-import { useSnackbar } from 'notistack';
+import { useSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles({
     input: {
@@ -37,9 +38,11 @@ const Home = () => {
     const [allItems, setAllItems] = useState([]);
     const [allCategories, setAllCategories] = useState([]);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-    const [toDeleteItem, setToDeleteItem] = useState('');
+    const [toDeleteItem, setToDeleteItem] = useState("");
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const { enqueueSnackbar } = useSnackbar();
+    const navigate = useNavigate();
 
     const fetchAllItems = () => {
         axios
@@ -49,7 +52,6 @@ const Home = () => {
                 },
             })
             .then((response) => {
-                // console.log("All menu items:", response.data.menuItems);
                 setAllItems(response.data.menuItems);
             })
             .catch((err) => {
@@ -64,7 +66,6 @@ const Home = () => {
         axios
             .get(`http://localhost:5001/category/all`)
             .then((response) => {
-                // console.log("All categories:", response.data.categories);
                 setAllCategories(response.data.categories);
             })
             .catch((err) => {
@@ -75,7 +76,29 @@ const Home = () => {
             });
     };
 
-    useEffect(() => {
+    const verifyCurrentUser = async () => {
+        try {
+            let response = await axios.get(
+                `http://localhost:5001/user/auth/currentuser`,
+                {
+                    headers: {
+                        authorization: window.localStorage.getItem("bearer"),
+                    },
+                }
+            );
+            setIsAdmin(response.data.user.is_admin);
+            return;
+        } catch (error) {
+            console.log("Error fetching current user in home:", error);
+            enqueueSnackbar("Please login to view home page!", {
+                variant: "error",
+            });
+            return navigate("/login");
+        }
+    };
+
+    useEffect(async () => {
+        await verifyCurrentUser();
         fetchAllItems();
         fetchAllCategories();
     }, []);
@@ -93,34 +116,42 @@ const Home = () => {
     const handleOpenDeleteDialog = (itemId) => {
         setOpenDeleteDialog(true);
         setToDeleteItem(itemId);
-    }
+    };
 
     const handleCloseDeleteDialog = () => {
         setOpenDeleteDialog(false);
-        setToDeleteItem('');
-    }
+        setToDeleteItem("");
+    };
 
     const handleItemDelete = () => {
-        axios.delete(`http://localhost:5001/menu/delete/${toDeleteItem}`)
+        axios
+            .delete(`http://localhost:5001/menu/delete/${toDeleteItem}`)
             .then((deleteResp) => {
                 console.log("Delete response:", deleteResp);
                 handleCloseDeleteDialog();
                 fetchAllItems();
-                if(deleteResp.data.deleteResp.modifiedCount === 1){
-                    return enqueueSnackbar('Menu item deleted successfully!', { variant: 'warning' });
+                if (deleteResp.data.deleteResp.modifiedCount === 1) {
+                    return enqueueSnackbar("Menu item deleted successfully!", {
+                        variant: "warning",
+                    });
                 } else {
-                    return enqueueSnackbar('Oops! Menu item can\'t be delete, Please try again!', { variant: 'warning' });
+                    return enqueueSnackbar(
+                        "Oops! Menu item can't be delete, Please try again!",
+                        { variant: "warning" }
+                    );
                 }
             })
             .catch((deleteErr) => {
                 console.log("Error in delete:", deleteErr);
                 handleCloseDeleteDialog();
-                return enqueueSnackbar('Oops! Menu item can\'t be delete, Please try again!', { variant: 'warning' });
-            })
-    }
+                return enqueueSnackbar(
+                    "Oops! Menu item can't be delete, Please try again!",
+                    { variant: "warning" }
+                );
+            });
+    };
 
     useEffect(() => {
-        // console.log("Filters", filters);
         fetchAllItems();
     }, [filters]);
 
@@ -226,6 +257,7 @@ const Home = () => {
                     category={category}
                     key={category._id}
                     handleOpenDeleteDialog={handleOpenDeleteDialog}
+                    isAdmin={isAdmin}
                 />
             ))}
 
@@ -247,7 +279,9 @@ const Home = () => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+                    <Button onClick={() => setOpenDeleteDialog(false)}>
+                        Cancel
+                    </Button>
                     <Button onClick={() => handleItemDelete()} autoFocus>
                         Delete
                     </Button>
