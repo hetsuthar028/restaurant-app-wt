@@ -21,7 +21,7 @@ const initialFormValues = {
 const emailRegExp =
     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
-const clientId = '189924922807-4lgk1n6ne4njqh238f20s87m8ugjq7uk.apps.googleusercontent.com';
+const clientId = process.env.REACT_APP_GOOGLE_CLIENTID;
 
 const Login = () => {
     const [formValues, setFormValues] = useState(initialFormValues);
