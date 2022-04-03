@@ -14,9 +14,11 @@ import Helpertext from "../shared/HelperText";
 import TextInput from "../shared/TextInput";
 import { useSnackbar } from "notistack";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
+import { GoogleLogin } from 'react-google-login';
+
 
 const initialFormValues = {
     email: "",
@@ -28,12 +30,15 @@ const initialFormValues = {
 const emailRegExp =
     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
+const clientId = '189924922807-4lgk1n6ne4njqh238f20s87m8ugjq7uk.apps.googleusercontent.com';
+
 const SignUp = () => {
     const [formValues, setFormValues] = useState(initialFormValues);
     const [formErrors, setFormErrors] = useState({});
     const [hasErrors, setHasErrors] = useState(true);
     const [showPasswordHelper, setShowPasswordHelper] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
+    const navigate = useNavigate();
 
     const validateInput = (name, value) => {
         if (name === "email" && !emailRegExp.test(value)) {
@@ -127,6 +132,38 @@ const SignUp = () => {
                 );
             });
     };
+
+    const onGoogleAuthSuccess = (res) => {
+        console.log("Google Login:", res);
+        console.log("Google Login Success", res.profileObj);
+        let bearer = {login_type: 'google', token: res.tokenId};
+        let {email, name: username, imageUrl: profile_url} = res.profileObj;
+
+        axios
+            .post(`http://localhost:5001/user/auth/google/signin`, {
+                email,
+                username,
+                profile_url
+            })
+            .then((response) => {
+                window.localStorage.setItem('bearer', JSON.stringify(bearer));
+                enqueueSnackbar("Google Sign In Successful!", {
+                    variant: "success",
+                });
+                return navigate('/home');
+            })
+            .catch((err) => {
+                return enqueueSnackbar(
+                    err?.response?.data?.message ?? "Please try again!",
+                    { variant: "error" }
+                );
+            });
+    }
+
+    const onGoogleAuthFailure = (res) => {
+        console.log("Google login failed:", res);
+    }
+
 
     return (
         <Grid container>
@@ -363,7 +400,14 @@ const SignUp = () => {
                         </FormControl>
 
                         <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                            <Button variant="contained">Google</Button>
+                            <GoogleLogin
+                                clientId={clientId}
+                                buttonText="Sign in with Google"
+                                onSuccess={onGoogleAuthSuccess}
+                                onFailure={onGoogleAuthFailure}
+                                cookiePolicy={'single_host_origin'}
+                            />
+                            {/* <Button variant="contained">Google</Button> */}
                         </FormControl>
                         <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
                             <Button variant="contained">Facebook</Button>

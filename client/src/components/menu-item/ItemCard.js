@@ -1,17 +1,11 @@
-import React, { useState } from "react";
-import {
-    Card,
-    Grid,
-    Typography,
-    Button,
-} from "@mui/material";
+import React from "react";
+import { Card, Grid, Typography, Button } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { useNavigate } from "react-router-dom";
 
 const ItemCard = (props) => {
-    const { menuItem, handleOpenDeleteDialog } = props;
+    const { menuItem, handleOpenDeleteDialog, isAdmin } = props;
     const navigate = useNavigate();
-    
 
     const handleEdit = (menuId) => {
         navigate("/menu/add", {
@@ -61,27 +55,36 @@ const ItemCard = (props) => {
                     </Button>
 
                     {/* Only if the user is admin */}
-                    <Button
-                        variant="contained"
-                        size="small"
-                        sx={{ backgroundColor: "#854D27", mx: 1 }}
-                    >
-                        <Typography
-                            fontFamily="Bartender SmCond Serif Pressed"
-                            onClick={() => handleEdit(menuItem._id)}
-                        >
-                            Edit
-                        </Typography>
-                    </Button>
-                    <Button
-                        variant="contained"
-                        size="small"
-                        sx={{ backgroundColor: "#DD7230", mx: 1 }}
-                    >
-                        <Typography fontFamily="Bartender SmCond Serif Pressed" onClick={() => handleOpenDeleteDialog(menuItem._id)}>
-                            Delete
-                        </Typography>
-                    </Button>
+                    {isAdmin && (
+                        <React.Fragment>
+                            <Button
+                                variant="contained"
+                                size="small"
+                                sx={{ backgroundColor: "#854D27", mx: 1 }}
+                            >
+                                <Typography
+                                    fontFamily="Bartender SmCond Serif Pressed"
+                                    onClick={() => handleEdit(menuItem._id)}
+                                >
+                                    Edit
+                                </Typography>
+                            </Button>
+                            <Button
+                                variant="contained"
+                                size="small"
+                                sx={{ backgroundColor: "#DD7230", mx: 1 }}
+                            >
+                                <Typography
+                                    fontFamily="Bartender SmCond Serif Pressed"
+                                    onClick={() =>
+                                        handleOpenDeleteDialog(menuItem._id)
+                                    }
+                                >
+                                    Delete
+                                </Typography>
+                            </Button>
+                        </React.Fragment>
+                    )}
                 </Grid>
 
                 <Grid item xs={12} md={12} sm={12} sx={{ px: 2, py: 1 }}>
