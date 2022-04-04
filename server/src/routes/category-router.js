@@ -1,37 +1,32 @@
 const express = require("express");
 const CategorySchema = require("../models/Category");
+const ApiError = require("../util/ApiError");
 
 const categoryRouter = express.Router();
 
 // @GET - Get all categories
-categoryRouter.get("/all", (req, res) => {
+categoryRouter.get("/all", (req, res, next) => {
     try {
         CategorySchema.find({ is_deleted: false })
             .then((categories) => {
                 return res.status(201).send({ success: true, categories });
             })
             .catch((findErr) => {
-                console.log("Find error:", findErr);
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                console.error("Find error:", findErr);
+                return next(ApiError.apiInternal('Please try again!'));
             });
     } catch (error) {
-        console.log("Error in add category request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        console.error("Error in add category request;", error);
+        return next(ApiError.apiInternal('Some error occured'));
     }
 });
 
 // @POST - Add a category
-categoryRouter.post("/add", (req, res) => {
+categoryRouter.post("/add", (req, res, next) => {
     try {
         let { name, description } = req.body;
         if (!name || !description) {
-            return res
-                .status(400)
-                .send({ success: false, message: "Invalid category data" });
+            return next(ApiError.badRequest('Invalid category data'));
         }
 
         CategorySchema.create({ name, description })
@@ -39,27 +34,21 @@ categoryRouter.post("/add", (req, res) => {
                 return res.status(201).send({ success: true, category });
             })
             .catch((categoryError) => {
-                console.log("Category Add Error:", categoryError);
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                console.error("Category Add Error:", categoryError);
+                return next(ApiError.apiInternal('Please try again!'));
             });
     } catch (error) {
-        console.log("Error in add category request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        console.error("Error in add category request;", error);
+        return next(ApiError.apiInternal('Some error occured'));
     }
 });
 
 // @PUT - Edit a category
-categoryRouter.put("/edit/:categoryId", (req, res) => {
+categoryRouter.put("/edit/:categoryId", (req, res, next) => {
     try {
         let categoryId = req.params?.categoryId;
         if (!categoryId || categoryId === undefined) {
-            return res
-                .status(400)
-                .send({ success: false, message: "Invalid category Id" });
+            return next(ApiError.badRequest('Invalid category id'));
         }
 
         CategorySchema.updateOne(
@@ -75,27 +64,21 @@ categoryRouter.put("/edit/:categoryId", (req, res) => {
                 return res.status(200).send({ success: true, updateResp });
             })
             .catch((updateErr) => {
-                console.log("Update Error:", updateErr?.message);
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                console.error("Update Error:", updateErr?.message);
+                return next(ApiError.apiInternal('Please try again!'));
             });
     } catch (error) {
-        console.log("Error in edit category request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        console.error("Error in edit category request;", error);
+        return next(ApiError.apiInternal('Some error occured'));
     }
 });
 
 // @DELETE - Delete a category
-categoryRouter.delete("/delete/:categoryId", (req, res) => {
+categoryRouter.delete("/delete/:categoryId", (req, res, next) => {
     try {
         let categoryId = req.params?.categoryId;
         if (!categoryId || categoryId === undefined) {
-            return res
-                .status(400)
-                .send({ success: false, message: "Invalid category Id" });
+            return next(ApiError.badRequest('Invalid category id'));
         }
 
         CategorySchema.updateOne(
@@ -111,16 +94,12 @@ categoryRouter.delete("/delete/:categoryId", (req, res) => {
                 return res.status(200).send({ success: true, deleteResp });
             })
             .catch((deleteErr) => {
-                console.log("Delete Error:", deleteErr?.message);
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                console.error("Delete Error:", deleteErr?.message);
+                return next(ApiError.apiInternal('Please try again!'));
             });
     } catch (error) {
-        console.log("Error in delete category request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        console.error("Error in delete category request;", error);
+        return next(ApiError.apiInternal('Some error occured'));
     }
 });
 

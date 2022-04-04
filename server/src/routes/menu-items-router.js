@@ -5,11 +5,12 @@ const menuItemsRouter = express.Router();
 const axios = require("axios");
 const { addJobToQueue } = require("../queue/jobQueue");
 const { v4: uuid4 } = require("uuid");
+const ApiError = require("../util/ApiError");
 
 const PAGE_SIZE = 4;
 
 // @POST - Add a menu item
-menuItemsRouter.post("/add", menuItemValidator, (req, res) => {
+menuItemsRouter.post("/add", menuItemValidator, (req, res, next) => {
     try {
         MenuItemSchema.create({
             ...req.body,
@@ -26,20 +27,16 @@ menuItemsRouter.post("/add", menuItemValidator, (req, res) => {
             })
             .catch((menuItemErr) => {
                 console.log("Error in adding menu item in DB:", menuItemErr);
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                return next(ApiError.badRequest("Menu item can't be added"));
             });
     } catch (error) {
         console.log("Error in add menu item request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        return next(ApiError.apiInternal('Some error occured while adding menu item'));
     }
 });
 
 // @GET - All menu items
-menuItemsRouter.get("/all", (req, res) => {
+menuItemsRouter.get("/all", (req, res, next) => {
     try {
         let {available, is_veg, category, query, price, size, page} = req.query;
         
@@ -99,7 +96,7 @@ menuItemsRouter.get("/all", (req, res) => {
         page = parseInt(page);
 
         if(size < 0 || page < 0){
-            return res.status(400).send({success: false, message: "Invalid pagination request"});
+            return next(ApiError.badRequest('Invalid pagination request'));
         }
 
 
@@ -119,26 +116,26 @@ menuItemsRouter.get("/all", (req, res) => {
             })
             .catch((findErr) => {
                 console.log("Find error:", findErr);
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                return next(ApiError.badRequest("Can't find the requested information"));
+                // return res
+                //     .status(500)
+                //     .send({ success: false, message: "Some error occured!" });
             });
     } catch (error) {
         console.log("Error in add menu item request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        return next(ApiError.apiInternal('Please try again'));
+        // return res
+        //     .status(400)
+        //     .send({ success: false, message: "Please try again!" });
     }
 });
 
 // @GET - Menu Item by ID
-menuItemsRouter.get("/id/:menuId", (req, res) => {
+menuItemsRouter.get("/id/:menuId", (req, res, next) => {
     try {
         let menuId = req.params?.menuId;
         if (!menuId || menuId === undefined) {
-            return res
-                .status(400)
-                .send({ success: false, message: "Invalid menu Id" });
+            return next(ApiError.badRequest('Invalid menu id'));
         }
 
         MenuItemSchema.findOne({ _id: menuId, is_deleted: false })
@@ -146,27 +143,21 @@ menuItemsRouter.get("/id/:menuId", (req, res) => {
                 return res.status(200).send({ success: true, menuItem });
             })
             .catch((findErr) => {
-                console.log("Find error:", findErr);
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                console.error("Find error:", findErr);
+                return next(ApiError.notFound("Menu item can't be found"));
             });
     } catch (error) {
-        console.log("Error in get menu item request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        console.error("Error in get menu item request;", error);
+        return next(ApiError.apiInternal('Some error occured'));
     }
 });
 
 // @PUT - Edit a menu item
-menuItemsRouter.put("/edit/:menuId", (req, res) => {
+menuItemsRouter.put("/edit/:menuId", (req, res, next) => {
     try {
         let menuId = req.params?.menuId;
         if (!menuId || menuId === undefined) {
-            return res
-                .status(400)
-                .send({ success: false, message: "Invalid menu Id" });
+            return next(ApiError.badRequest('Invalid menu id'));
         }
 
         MenuItemSchema.updateOne(
@@ -176,7 +167,6 @@ menuItemsRouter.put("/edit/:menuId", (req, res) => {
             }
         )
             .then((menuItem) => {
-                // console.log("Existing images", req.body.existingImages ?? []);
                 if(req.body.images && req.body.name){
                     addJobToQueue({
                         jobId: uuid4(),
@@ -195,32 +185,23 @@ menuItemsRouter.put("/edit/:menuId", (req, res) => {
                         .toString()
                         .indexOf("Cast to ObjectId failed") > -1
                 ) {
-                    return res.status(400).send({
-                        success: false,
-                        message: "Invalid menu item id",
-                    });
+                    return next(ApiError.badRequest('Invalid menu id'));
                 }
 
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                return next(ApiError.badRequest('Please try again!'));
             });
     } catch (error) {
-        console.log("Error in edit menu item request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        console.error("Error in edit menu item request;", error);
+        return next(ApiError.apiInternal('Some error occured'));
     }
 });
 
 // @DELETE - Delete a menu item
-menuItemsRouter.delete("/delete/:menuId", (req, res) => {
+menuItemsRouter.delete("/delete/:menuId", (req, res, next) => {
     try {
         let menuId = req.params.menuId;
         if (!menuId || menuId === undefined) {
-            return res
-                .status(400)
-                .send({ success: false, message: "Menu Id is required" });
+            return next(ApiError.badRequest('Invalid menu id'));
         }
 
         MenuItemSchema.updateOne(
@@ -234,16 +215,12 @@ menuItemsRouter.delete("/delete/:menuId", (req, res) => {
                 return res.status(200).send({ success: true, deleteResp });
             })
             .catch((deleteErr) => {
-                console.log("Item Delete Error:", deleteErr.message);
-                return res
-                    .status(500)
-                    .send({ success: false, message: "Some error occured!" });
+                console.error("Item Delete Error:", deleteErr.message);
+                return next(ApiError.badRequest('Please try again!'));
             });
     } catch (error) {
-        console.log("Error in edit menu item request;", error);
-        return res
-            .status(400)
-            .send({ success: false, message: "Please try again!" });
+        console.error("Error in edit menu item request;", error);
+        return next(ApiError.apiInternal('Some error occured'));
     }
 });
 

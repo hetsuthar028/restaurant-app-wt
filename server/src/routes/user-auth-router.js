@@ -3,14 +3,16 @@ const userRouter = express.Router();
 const UserSchema = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const ApiError = require('../util/ApiError');
 
 // Middleware
 const { userDataValidator } = require("../middlewares/user-validator");
 const { vertifyToken } = require("../middlewares/verify-token");
 const { verifyMyToken } = require("../middlewares/validate-token");
+const { isAdmin } = require('../middlewares/isAdmin');
 
 // @POST - User registration
-userRouter.post("/signup", userDataValidator, (req, res) => {
+userRouter.post("/signup", userDataValidator, (req, res, next) => {
     try {
         const {
             username,
@@ -39,15 +41,12 @@ userRouter.post("/signup", userDataValidator, (req, res) => {
             email: email,
         }).then((user) => {
             if (user) {
-                return res
-                    .status(400)
-                    .send({ success: false, message: "User already exists!" });
+                return next(ApiError.badRequest('User already exists!'));
             }
 
             newUser
                 .save()
                 .then((saveUserResp) => {
-                    console.log("User created successfully!");
                     return res.status(201).send({
                         success: true,
                         message: "User created successfully!",
@@ -55,29 +54,23 @@ userRouter.post("/signup", userDataValidator, (req, res) => {
                     });
                 })
                 .catch((saveUserErr) => {
-                    console.log("Error creating user", saveUserErr.message);
-                    return res.status(400).send({
-                        success: false,
-                        message: "Some error occured!",
-                    });
+                    return next(ApiError.badRequest("User can't be created"));
                 });
         });
     } catch (error) {
-        console.log("Error ", error);
+        next(error);
     }
 });
 
 // @POST - User login
-userRouter.post("/login", (req, res) => {
+userRouter.post("/login", (req, res, next) => {
     try {
         let { email, password, auth_type = "normal" } = req.body;
+        
         UserSchema.findOne({ email: email, auth_type })
             .then((user) => {
                 if (user === null) {
-                    return res.status(400).send({
-                        success: false,
-                        message: "Invalid email or password",
-                    });
+                    return next(ApiError.badRequest('Invalid email or password'));
                 }
 
                 if (bcrypt.compareSync(password ?? "", user.password)) {
@@ -88,24 +81,20 @@ userRouter.post("/login", (req, res) => {
                     );
                     return res.status(200).send({ success: true, token });
                 }
-                return res.status(400).send({
-                    success: false,
-                    message: "Invalid email or password",
-                });
+                return next(ApiError.badRequest('Invalid email or password'));
             })
             .catch((err) => {
                 console.log("Error while getting user", err);
-                return res
-                    .status(400)
-                    .send({ success: false, message: "Some error occured!" });
+                return next(ApiError.badRequest('Invalid email or password'));
             });
     } catch (error) {
         console.log("Some error", error);
+        next(error);
     }
 });
 
 // @POST - Google Sign In
-userRouter.post("/google/signin", (req, res) => {
+userRouter.post("/google/signin", (req, res, next) => {
     try {
         let { email, profile_url, username } = req.body;
         let salt = bcrypt.genSaltSync(10);
@@ -129,10 +118,11 @@ userRouter.post("/google/signin", (req, res) => {
                 return res.status(201).send({ success: true, user });
             })
             .catch((err) => {
-                console.log("Error in google login:", err);
+                return next(ApiError.badRequest('Please try again!'));
             });
     } catch (error) {
         console.log("Error in G Sign In", error);
+        return next(ApiError.apiInternal('Error while signing with google'));
     }
 });
 

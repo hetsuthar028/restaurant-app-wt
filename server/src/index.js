@@ -7,6 +7,7 @@ const menuItemsRouter = require('./routes/menu-items-router');
 const categoryRouter = require('./routes/category-router');
 const uploadImageRouter = require('./routes/upload-image-router');
 const cors = require('cors');
+const apiErrorHandler = require('./error/apiErrorHandler');
 
 const app = express();
 
@@ -35,6 +36,8 @@ app.use('/category', categoryRouter);
 app.use('/upload', uploadImageRouter);
 
 // Error handlers middlewares
+app.use(apiErrorHandler);
+
 app.use((req, res, next) => {
     const error = new Error('Resource not found');
     error.status = 404;
@@ -42,6 +45,7 @@ app.use((req, res, next) => {
 })
 
 app.use((error, req, res, next) => {
+    console.log("Something", error);
     res.status(error.status || 500)
     .send({
         success: false, 
