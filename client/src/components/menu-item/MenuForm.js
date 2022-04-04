@@ -67,7 +67,7 @@ const MenuForm = () => {
                 setCategoryList(response.data.categories);
             })
             .catch((err) => {
-                console.log("Error loading categories!", err?.response?.data);
+                console.log("Error loading categories!", err?.response);
             });
     };
 
@@ -81,7 +81,7 @@ const MenuForm = () => {
                     },
                 }
             );
-            console.log("Response in Home", response.data);
+            console.log("Response in Menu Form", response.data);
             if (!response.data.user.is_admin) {
                 enqueueSnackbar("Unauthorized access", { variant: "warning" });
                 return navigate("/home");
@@ -96,8 +96,8 @@ const MenuForm = () => {
         }
     };
 
-    useEffect(async () => {
-        await verifyCurrentUser();
+    useEffect(() => {
+        verifyCurrentUser();
         fetchAllCategories();
 
         // If form is opened for editing
@@ -680,7 +680,7 @@ const MenuForm = () => {
 
                         <Grid container>
                             {editMode &&
-                                formValues.images.map((imageUrl, idx) => (
+                                formValues?.images?.map((imageUrl, idx) => (
                                     <Card
                                         className="container"
                                         key={idx}
