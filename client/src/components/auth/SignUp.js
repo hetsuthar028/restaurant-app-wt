@@ -121,9 +121,10 @@ const SignUp = () => {
                 ...formValues,
             })
             .then((response) => {
-                return enqueueSnackbar("Account created successfully!", {
+                enqueueSnackbar("Account created successfully!", {
                     variant: "success",
                 });
+                return navigate('/login');
             })
             .catch((err) => {
                 return enqueueSnackbar(
@@ -187,7 +188,7 @@ const SignUp = () => {
                 }}
             >
                 <form method="POST" onSubmit={handleRegularSignUp}>
-                    <Typography variant="h4" textAlign="center" my={2}>
+                    <Typography variant="h3" textAlign="center" my={2} fontFamily="Bartender SmCond Serif Pressed" sx={{color: '#DD7230'}}>
                         Sign Up
                     </Typography>
 
@@ -235,7 +236,7 @@ const SignUp = () => {
                             />
                         </FormControl>
                         {showPasswordHelper && (
-                            <Grid container sx={{ width: "80%" }}>
+                            <Grid container sx={{ width: "80%", my: 0.5 }}>
                                 <Grid
                                     item
                                     xs={12}

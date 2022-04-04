@@ -73,9 +73,10 @@ const Login = () => {
                 console.log("Login response", response.data);
                 let bearer = {login_type: 'normal', token: response.data.token}
                 window.localStorage.setItem("bearer", JSON.stringify(bearer));
-                return enqueueSnackbar("Login Successful!", {
+                enqueueSnackbar("Login Successful!", {
                     variant: "success",
                 });
+                return navigate('/home');
             })
             .catch((err) => {
                 console.log("Error while Logging in", err?.response.data);

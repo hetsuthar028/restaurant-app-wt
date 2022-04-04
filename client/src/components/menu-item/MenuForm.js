@@ -23,6 +23,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import "./MenuForm.css";
 import { useNavigate, useLocation } from "react-router-dom";
+import Navbar from "../navbar/NavBar";
 
 const initialFormValues = {
     name: "",
@@ -319,6 +320,7 @@ const MenuForm = () => {
 
     return (
         <Grid container>
+            <Navbar />
             <Grid item xs={12} md={12} sm={12} my={1} sx={{ px: 2 }}>
                 <Typography
                     variant="h4"
@@ -331,6 +333,7 @@ const MenuForm = () => {
                     <Chip label="Item Details" />
                 </Divider>
             </Grid>
+            <Grid item xs={12} sm={12} md={12}>
             <form method="POST" onSubmit={handleFormSubmit}>
                 {/* Main Form */}
                 <Grid container>
@@ -772,6 +775,7 @@ const MenuForm = () => {
                     </Grid>
                 </Grid>
             </form>
+            </Grid>
         </Grid>
     );
 };

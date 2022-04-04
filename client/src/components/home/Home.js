@@ -21,16 +21,24 @@ import CategorySection from "./CategorySection";
 import { makeStyles } from "@mui/styles";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../navbar/NavBar";
 
-const useStyles = makeStyles({
-    input: {
-        color: "#ccc",
-        borderColor: "#ccc",
+const useStyles = makeStyles((theme) => ({
+    selectDark: {
+        '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#DD7230',
+            color: 'white'
+          },
+          '& .MuiOutlinedInput-input': {
+              color: 'white'
+          },
     },
-    multilineColor: {
-        color: "red",
-    },
-});
+    textDark: {
+        '& .MuiOutlinedInput-root, .MuiInputBase-sizeSmall, MuiInputBase-colorPrimary': {
+            border: '1px solid red'
+        }
+    }
+}))
 
 const Home = () => {
     const classes = useStyles();
@@ -156,10 +164,17 @@ const Home = () => {
     }, [filters]);
 
     return (
-        <Grid container>
+        <Grid 
+            container
+            sx={{
+                background: `url(https://images.unsplash.com/photo-1554050857-c84a8abdb5e2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=327&q=80)`,
+            }}
+        >
+            <Navbar />
             <Grid container>
                 <Grid item xs={12} md={6} sm={6} sx={{ p: 2 }}>
-                    <FormControl sx={{ mx: 1, width: "75%" }}>
+                    <form method='POST'>
+                    <FormControl fullWidth sx={{ mx: 1, width: "80%" }}>
                         <TextInput
                             placeholder="Search Food Items"
                             label="Search Food Items"
@@ -167,12 +182,17 @@ const Home = () => {
                             size="small"
                             value={filters.query}
                             onChange={handleFilterChange}
+                            className={classes.textDark}
+                            mode='dark'
                         />
                     </FormControl>
+                    </form>
                 </Grid>
                 <Grid item xs={12} md={6} sm={6} textAlign="end" sx={{ p: 2 }}>
                     <FormControl sx={{ minWidth: 120, mx: 1 }}>
-                        <InputLabel id="demo-simple-select-label">
+                        <InputLabel id="demo-simple-select-label" sx={{
+                            color: 'white'
+                        }}>
                             Price
                         </InputLabel>
                         <Select
@@ -183,14 +203,17 @@ const Home = () => {
                             name="price"
                             size="small"
                             onChange={handleFilterChange}
+                            className={classes.selectDark}
                         >
                             <MenuItem value={0}>-</MenuItem>
                             <MenuItem value={1}>Low to High</MenuItem>
                             <MenuItem value={-1}>High to Low</MenuItem>
                         </Select>
                     </FormControl>
-                    <FormControl sx={{ minWidth: 120, mx: 1 }}>
-                        <InputLabel id="demo-simple-select-label">
+                    <FormControl sx={{ minWidth: 120, mx: 1, }}>
+                        <InputLabel id="demo-simple-select-label" sx={{
+                            color: 'white'
+                        }}>
                             Availability
                         </InputLabel>
                         <Select
@@ -201,6 +224,7 @@ const Home = () => {
                             size="small"
                             name="available"
                             onChange={handleFilterChange}
+                            className={classes.selectDark}
                         >
                             <MenuItem value={"all"}>All</MenuItem>
                             <MenuItem value={true}>Available</MenuItem>
@@ -208,7 +232,9 @@ const Home = () => {
                         </Select>
                     </FormControl>
                     <FormControl sx={{ minWidth: 120, mx: 1 }}>
-                        <InputLabel id="demo-simple-select-label">
+                        <InputLabel id="demo-simple-select-label" sx={{
+                            color: 'white'
+                        }}>
                             Course
                         </InputLabel>
                         <Select
@@ -218,6 +244,7 @@ const Home = () => {
                             name="category"
                             size="small"
                             onChange={handleFilterChange}
+                            className={classes.selectDark}
                         >
                             <MenuItem value={"all"}>All</MenuItem>
                             {allCategories.map((category) => (
@@ -231,7 +258,9 @@ const Home = () => {
                         </Select>
                     </FormControl>
                     <FormControl sx={{ minWidth: 120, mx: 1 }}>
-                        <InputLabel id="demo-simple-select-label">
+                        <InputLabel id="demo-simple-select-label" sx={{
+                            color: 'white'
+                        }}>
                             Veg or Non-veg
                         </InputLabel>
                         <Select
@@ -241,6 +270,7 @@ const Home = () => {
                             size="small"
                             name="is_veg"
                             onChange={handleFilterChange}
+                            className={classes.selectDark}
                         >
                             <MenuItem value={"all"}>All</MenuItem>
                             <MenuItem value={true}>Veg</MenuItem>

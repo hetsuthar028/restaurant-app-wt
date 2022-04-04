@@ -29,10 +29,11 @@ const CategorySection = (props) => {
                     variant="h4"
                     textAlign="center"
                     my={1}
+                    sx={{color: '#DD7230'}}
                 >
                     {category.name}
                 </Typography>
-                <Divider sx={{ mx: 2 }} />
+                <Divider sx={{ mx: 2, background: '#DD7230' }} />
 
                 <Grid container>
                     {items

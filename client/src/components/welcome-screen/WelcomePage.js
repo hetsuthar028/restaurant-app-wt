@@ -1,10 +1,10 @@
 import React from "react";
-import { Typography, Grid, Card, Button, Avatar } from "@mui/material";
+import { Typography, Grid } from "@mui/material";
 import "./WelcomePage.css";
 import PushPinRoundedIcon from "@mui/icons-material/PushPinRounded";
 import QueryBuilderTwoToneIcon from "@mui/icons-material/QueryBuilderTwoTone";
-import { Link } from "react-router-dom";
 import Footer from "../footer/Footer";
+import Navbar from "../navbar/NavBar";
 
 const WelcomePage = () => {
     return (
@@ -14,70 +14,7 @@ const WelcomePage = () => {
                 background: `url(https://images.unsplash.com/photo-1554050857-c84a8abdb5e2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=327&q=80)`,
             }}
         >
-            <Grid item xs={2} sm={2} md={2} sx={{ px: 2 }}>
-                <Typography
-                    variant="h2"
-                    fontFamily="Bartender Serif"
-                    sx={{ color: "#ccc" }}
-                >
-                    Foodie
-                </Typography>
-            </Grid>
-            <Grid
-                item
-                xs={12}
-                sm={6}
-                md={6}
-                sx={{ display: "inline-flex", color: "#DD7230", py: 3 }}
-            >
-                <Typography
-                    variant="h5"
-                    fontFamily="Bartender Serif"
-                    sx={{ mx: 2 }}
-                >
-                    Home
-                </Typography>
-                <Typography
-                    variant="h5"
-                    fontFamily="Bartender Serif"
-                    sx={{ mx: 2 }}
-                >
-                    Add menu
-                </Typography>
-                <Typography
-                    variant="h5"
-                    fontFamily="Bartender Serif"
-                    sx={{ mx: 2 }}
-                >
-                    Contact Us
-                </Typography>
-                <Typography
-                    variant="h5"
-                    fontFamily="Bartender Serif"
-                    sx={{ mx: 2 }}
-                >
-                    About Us
-                </Typography>
-            </Grid>
-
-            <Grid
-                item
-                xs={12}
-                sm={4}
-                md={4}
-                textAlign="end"
-                sx={{
-                    px: 2,
-                    py: 3,
-                    display: "inline-flex",
-                    placeContent: "end",
-                }}
-            >
-                <Button sx={{ border: "3px solid #DD7230", color: "#DD7230" }}>
-                    tel: 1111-111-111
-                </Button>
-                <Avatar sx={{ backgroundColor: "#DD7230", mx: 2 }} />
-            </Grid>
+            <Navbar />
 
             <Grid item xs={4} sm={4} md={4}>
                 <img
