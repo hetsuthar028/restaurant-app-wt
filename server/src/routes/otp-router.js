@@ -84,6 +84,7 @@ otpRouter.post('/verify', (req, res, next) => {
         .then((resp) => {
             console.log("Verify response", resp);
             if(resp == otp){
+                redisClient.del(email);
                 return res.status(200).send({success: true, message: "Verified"});
             } else {
                 return next(ApiError.badRequest('Invalid otp'));
