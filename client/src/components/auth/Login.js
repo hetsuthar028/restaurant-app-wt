@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import { GoogleLogin } from 'react-google-login';
+import { FacebookLogin } from "react-facebook-login";
 
 const initialFormValues = {
     email: "",
