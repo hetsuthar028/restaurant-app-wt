@@ -6,6 +6,7 @@ const userRouter = require('./routes/user-auth-router');
 const menuItemsRouter = require('./routes/menu-items-router');
 const categoryRouter = require('./routes/category-router');
 const uploadImageRouter = require('./routes/upload-image-router');
+const otpRouter = require('./routes/otp-router');
 const cors = require('cors');
 const apiErrorHandler = require('./error/apiErrorHandler');
 
@@ -34,6 +35,7 @@ app.use('/user/auth/', userRouter);
 app.use('/menu/', menuItemsRouter);
 app.use('/category', categoryRouter);
 app.use('/upload', uploadImageRouter);
+app.use('/otp', otpRouter);
 
 // Error handlers middlewares
 app.use(apiErrorHandler);
