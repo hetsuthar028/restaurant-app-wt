@@ -8,7 +8,7 @@ exports.verifyMyToken = async (req, res, next) => {
     try {
         let bearer = JSON.parse(req.headers.authorization ?? "");
         if (bearer === null) {
-            return next(ApiError.badRequest('Invalid token'));
+            return next(ApiError.unauthenticatedRequest('Invalid token'));
         }
 
         // Normal auth type - Token Validation
@@ -19,14 +19,14 @@ exports.verifyMyToken = async (req, res, next) => {
                 let userId = jwt.decode(bearer.token).userId;
 
                 if (!userId) {
-                    return next(ApiError.badRequest('Invalid token'));
+                    return next(ApiError.unauthenticatedRequest('Invalid token'));
                 }
 
                 req.userId = userId;
                 req.auth_type = "normal";
                 next();
             } else {
-                return next(ApiError.badRequest('Invalid token'));
+                return next(ApiError.unauthenticatedRequest('Invalid token'));
             }
         } else if (bearer["login_type"] === "google") {
             // Verify here google token id with google-auth-library
@@ -46,6 +46,6 @@ exports.verifyMyToken = async (req, res, next) => {
             next();
         }
     } catch (error) {
-        return next(ApiError.badRequest('Invalid token'));
+        return next(ApiError.unauthenticatedRequest('Invalid token'));
     }
 };

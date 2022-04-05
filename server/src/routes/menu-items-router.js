@@ -6,11 +6,13 @@ const axios = require("axios");
 const { addJobToQueue } = require("../queue/jobQueue");
 const { v4: uuid4 } = require("uuid");
 const ApiError = require("../util/ApiError");
+const { isAdmin } = require('../middlewares/isAdmin');
+const { verifyMyToken } = require('../middlewares/validate-token');
 
 const PAGE_SIZE = 4;
 
 // @POST - Add a menu item
-menuItemsRouter.post("/add", menuItemValidator, (req, res, next) => {
+menuItemsRouter.post("/add", menuItemValidator, verifyMyToken, isAdmin, (req, res, next) => {
     try {
         MenuItemSchema.create({
             ...req.body,
@@ -36,7 +38,7 @@ menuItemsRouter.post("/add", menuItemValidator, (req, res, next) => {
 });
 
 // @GET - All menu items
-menuItemsRouter.get("/all", (req, res, next) => {
+menuItemsRouter.get("/all", verifyMyToken, (req, res, next) => {
     try {
         let {available, is_veg, category, query, price, size, page} = req.query;
         
@@ -131,7 +133,7 @@ menuItemsRouter.get("/all", (req, res, next) => {
 });
 
 // @GET - Menu Item by ID
-menuItemsRouter.get("/id/:menuId", (req, res, next) => {
+menuItemsRouter.get("/id/:menuId", verifyMyToken, (req, res, next) => {
     try {
         let menuId = req.params?.menuId;
         if (!menuId || menuId === undefined) {
@@ -153,7 +155,7 @@ menuItemsRouter.get("/id/:menuId", (req, res, next) => {
 });
 
 // @PUT - Edit a menu item
-menuItemsRouter.put("/edit/:menuId", (req, res, next) => {
+menuItemsRouter.put("/edit/:menuId", verifyMyToken, isAdmin, (req, res, next) => {
     try {
         let menuId = req.params?.menuId;
         if (!menuId || menuId === undefined) {
@@ -168,11 +170,13 @@ menuItemsRouter.put("/edit/:menuId", (req, res, next) => {
         )
             .then((menuItem) => {
                 if(req.body.images && req.body.name){
+                    console.log("Auth Header in Edit", req.headers.authorization);
                     addJobToQueue({
                         jobId: uuid4(),
                         menuId: menuId,
                         images: req.body.images,
-                        existingImages: req.body.existingImages ?? []
+                        existingImages: req.body.existingImages ?? [],
+                        authHeader: req.headers.authorization,
                     });
                 }
                 return res.status(200).send({ success: true, menuItem });
@@ -197,7 +201,7 @@ menuItemsRouter.put("/edit/:menuId", (req, res, next) => {
 });
 
 // @DELETE - Delete a menu item
-menuItemsRouter.delete("/delete/:menuId", (req, res, next) => {
+menuItemsRouter.delete("/delete/:menuId", verifyMyToken, isAdmin, (req, res, next) => {
     try {
         let menuId = req.params.menuId;
         if (!menuId || menuId === undefined) {

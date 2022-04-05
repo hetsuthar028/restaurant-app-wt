@@ -6,13 +6,17 @@ const NUM_WORKERS = 5;
 // Upload images
 jobQueue.process(NUM_WORKERS, async ({ data }) => {
     console.log("Inside JQ", data);
-    let { jobId, menuId, images, existingImages = [] } = data;
+    let { jobId, menuId, images, existingImages = [], authHeader } = data;
     // console.log("INSIDE JQ 3", jobId, menuId, images);
     axios
         .post("http://localhost:5001/upload/bucket", {
             files: images,
             location: "/items",
             existingImages: existingImages,
+        }, {
+            headers: {
+                authorization: authHeader
+            }
         })
         .then((uploadResp) => {
             console.log("Upload resp", uploadResp.data);
@@ -20,6 +24,10 @@ jobQueue.process(NUM_WORKERS, async ({ data }) => {
             axios
                 .put(`http://localhost:5001/menu/edit/${menuId}`, {
                     images: uploadResp.data.fileURLs,
+                }, {
+                    headers: {
+                        authorization: authHeader
+                    }
                 })
                 .then((updateResp) => {
                     console.log("Update resp in job queue:", updateResp.data);

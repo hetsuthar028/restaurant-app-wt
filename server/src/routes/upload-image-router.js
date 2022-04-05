@@ -4,6 +4,10 @@ const path = require('path');
 const { v4: uuid4 } = require('uuid');
 const fs = require('fs');
 
+// middlewares
+const { verifyMyToken } = require('../middlewares/validate-token');
+const { isAdmin } = require('../middlewares/isAdmin');
+
 // Firebase
 const { ref, getStorage, uploadBytes, getDownloadURL } = require('firebase/storage');
 const firebaseConfig = require('../../FirebaseConfig');
@@ -34,11 +38,7 @@ const uploader = multer({
     storage: storageMulter,
 })
 
-uploadImageRouter.get('/', (req, res) => {
-    res.send("HELLO FROM UPLOAD ROUTER");
-})
-
-uploadImageRouter.post('/cache', uploader.array('itemImage', 7), (req, res) => {
+uploadImageRouter.post('/cache', verifyMyToken, isAdmin, uploader.array('itemImage', 7), (req, res) => {
     console.log("GOT POST REQ")
     try {
         if(!req.files){
@@ -54,7 +54,7 @@ uploadImageRouter.post('/cache', uploader.array('itemImage', 7), (req, res) => {
 });
 
 
-uploadImageRouter.post('/bucket', (req, res) => {
+uploadImageRouter.post('/bucket', verifyMyToken, isAdmin, (req, res) => {
     try {
         let { files, location, existingImages = [] } = req.body;
         let fileURLs = [];

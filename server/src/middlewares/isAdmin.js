@@ -17,7 +17,7 @@ exports.isAdmin = async (req, res, next) => {
         if(response.is_admin === true){
             return next();
         } else {
-            return next(ApiError.unauthenticatedRequest('Not an admin'));
+            return next(ApiError.unauthorizedRequest('Not an admin'));
         }
             
     } catch (error) {

@@ -201,6 +201,7 @@ const MenuForm = () => {
             .post(`http://localhost:5001/upload/cache`, imagesFormData, {
                 headers: {
                     "Content-type": "multipart/form-data",
+                    authorization: window.localStorage.getItem('bearer')
                 },
             })
             .then((response) => {
@@ -236,6 +237,14 @@ const MenuForm = () => {
             })
             .catch((error) => {
                 console.log("Error from cache upload:", error?.response);
+                if(error.response.status === 401){
+                    enqueueSnackbar('Login is required', { variant: 'warning' });
+                    return navigate('/login');
+                }
+                if(error.response.status === 403){
+                    enqueueSnackbar('Unauthorized request', { variant: 'warning' });
+                    return navigate('/home');
+                }
             });
 
         setTempImage([...files]);
@@ -258,6 +267,10 @@ const MenuForm = () => {
                     recipe: recipeList,
                     images: allImages.map((file) => file.cacheFile),
                     existingImages: [...formValues.images],
+                }, {
+                    headers: {
+                        authorization: window.localStorage.getItem('bearer')
+                    }
                 })
                 .then((editResp) => {
                     console.log("Edit Response", editResp.data);
@@ -267,7 +280,15 @@ const MenuForm = () => {
                     return navigate("/home");
                 })
                 .catch((editErr) => {
-                    console.log("Error in Edit:", editErr?.response?.data);
+                    console.error("Error in Edit:", editErr?.response?.data);
+                    if(editErr.response.status === 401){
+                        enqueueSnackbar('Login is required', { variant: 'warning'});
+                        return navigate('/login');
+                    }
+                    if(editErr.response.status === 403){
+                        enqueueSnackbar('Unauthorized request', { variant: 'warning' });
+                        return navigate('/home');
+                    }
                     return enqueueSnackbar(
                         editErr?.response?.data?.message ??
                             "Please try again in a while!",
@@ -281,6 +302,10 @@ const MenuForm = () => {
                     ingredients: ingredientList,
                     recipe: recipeList,
                     images: allImages.map((file) => file.cacheFile),
+                }, {
+                    headers: {
+                        authorization: window.localStorage.getItem('bearer'),
+                    }
                 })
                 .then((response) => {
                     console.log("Add menu item response:", response.data);
@@ -290,10 +315,18 @@ const MenuForm = () => {
                     return navigate("/home");
                 })
                 .catch((err) => {
-                    console.log(
+                    console.error(
                         "Error in adding menu item:",
                         err?.response?.data
                     );
+                    if(err.response.status === 401){
+                        enqueueSnackbar('Login is required', { variant: 'warning' });
+                        return navigate('/login');
+                    }
+                    if(err.response.status === 403){
+                        enqueueSnackbar('Unauthorized request', { variant: 'warning' });
+                        return navigate('/home');
+                    }
                     return enqueueSnackbar(
                         err?.response?.data?.message ??
                             "Please try again in a while!",

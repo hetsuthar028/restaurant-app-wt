@@ -58,14 +58,22 @@ const Home = () => {
                 params: {
                     ...filters,
                 },
+                headers: {
+                    authorization: window.localStorage.getItem('bearer'),
+                }
             })
             .then((response) => {
                 setAllItems(response.data.menuItems);
             })
             .catch((err) => {
+                if(err.response.status === 401){
+                    enqueueSnackbar('Please login to view home page!', { variant: 'warning' });
+                    return navigate('/login');
+                }
                 console.log(
                     "Error in fetching all items:",
-                    err?.response?.data
+                    err?.response?.data,
+                    err.response
                 );
             });
     };
@@ -133,14 +141,18 @@ const Home = () => {
 
     const handleItemDelete = () => {
         axios
-            .delete(`http://localhost:5001/menu/delete/${toDeleteItem}`)
+            .delete(`http://localhost:5001/menu/delete/${toDeleteItem}`, {
+                headers: {
+                    authorization: window.localStorage.getItem('bearer')
+                }
+            })
             .then((deleteResp) => {
                 console.log("Delete response:", deleteResp);
                 handleCloseDeleteDialog();
                 fetchAllItems();
                 if (deleteResp.data.deleteResp.modifiedCount === 1) {
                     return enqueueSnackbar("Menu item deleted successfully!", {
-                        variant: "warning",
+                        variant: "success",
                     });
                 } else {
                     return enqueueSnackbar(
@@ -150,7 +162,14 @@ const Home = () => {
                 }
             })
             .catch((deleteErr) => {
-                console.log("Error in delete:", deleteErr);
+                console.log("Error in delete:", deleteErr?.response);
+                if(deleteErr.response.status === 401){
+                    enqueueSnackbar('Login is required', { variant: 'warning' });
+                    return navigate('/login');
+                }
+                if(deleteErr.response.status === 403){
+                    return enqueueSnackbar('Unauthorized request', { variant: 'warning' });
+                }
                 handleCloseDeleteDialog();
                 return enqueueSnackbar(
                     "Oops! Menu item can't be delete, Please try again!",
