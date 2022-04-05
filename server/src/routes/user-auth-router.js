@@ -10,6 +10,7 @@ const { userDataValidator } = require("../middlewares/user-validator");
 const { vertifyToken } = require("../middlewares/verify-token");
 const { verifyMyToken } = require("../middlewares/validate-token");
 const { isAdmin } = require('../middlewares/isAdmin');
+const { default: axios } = require("axios");
 
 // @POST - User registration
 userRouter.post("/signup", userDataValidator, (req, res, next) => {
@@ -125,6 +126,52 @@ userRouter.post("/google/signin", (req, res, next) => {
         return next(ApiError.apiInternal('Error while signing with google'));
     }
 });
+
+// @POST - Facebook login
+userRouter.post('/facebook/signin', (req, res, next) => {
+    try {
+        let {name: username, email, picture: profile_url, id, accessToken} = req.body;
+        let salt = bcrypt.genSaltSync(10);
+        let defaultEncryptedPassword = bcrypt.hashSync("Foodie$28", salt);
+
+        axios.get(`https://graph.facebook.com/${id}/picture?redirect=false`, {
+            access_token: accessToken
+        })
+        .then((profileResp) => {
+            console.log("Profile Resp:", profileResp.data);
+
+            UserSchema.updateOne(
+                { email: email, is_deleted: false },
+                {
+                    $set: {
+                        email,
+                        profile_url: profileResp.data.data.url,
+                        password: defaultEncryptedPassword,
+                        is_admin: false,
+                        username,
+                        auth_type: "facebook",
+                    },
+                },
+                { upsert: true }
+            )
+                .then((user) => {
+                    return res.status(201).send({ success: true, user });
+                })
+                .catch((err) => {
+                    return next(ApiError.badRequest('Please try again!'));
+                });
+
+        }).catch((profileErr) => {
+            console.log("Profile Error:", profileErr);
+        })
+
+        
+
+    } catch (error) {
+        console.log("Error in facebook signin:", error);
+        return next(ApiError.apiInternal('Error while signing with facebook'));
+    }
+})
 
 // @GET - Current user
 userRouter.get("/currentuser", verifyMyToken, (req, res) => {
