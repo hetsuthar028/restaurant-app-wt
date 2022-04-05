@@ -12,7 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import { GoogleLogin } from 'react-google-login';
-import { FacebookLogin } from "react-facebook-login";
+import FacebookLogin from 'react-facebook-login';
 
 const initialFormValues = {
     email: "",
@@ -121,6 +121,32 @@ const Login = () => {
         console.log("Google login failed:", res);
     }
 
+    const onFacebookAuthSuccess = (response) => {
+        console.log('Facebook auth response:', response);
+        let {name, picture, email, accessToken, id} = response;
+        let bearer = {login_type: 'facebook', token: accessToken};
+        
+        axios.post(`http://localhost:5001/user/auth/facebook/signin`, {
+            email,
+            name,
+            picture: picture.data.url,
+            id,
+            accessToken
+        }).then((response) => {
+            window.localStorage.setItem('bearer', JSON.stringify(bearer));
+            enqueueSnackbar("Facebook Sign In Successful!", {
+                variant: "success",
+            });
+            return navigate('/home');
+        })
+        .catch((err) => {
+            return enqueueSnackbar(
+                err?.response?.data?.message ?? "Please try again!",
+                { variant: "error" }
+            );
+        });
+    }
+
     return (
         <Grid container>
             <Grid item xs={0} md={7} sm={7}>
@@ -210,7 +236,13 @@ const Login = () => {
                         </FormControl>
 
                         <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                            <Button variant="contained">Facebook</Button>
+                            <FacebookLogin
+                                appId={process.env.REACT_APP_FACEBOOK_ID}
+                                fields="name,email,picture"
+                                callback={onFacebookAuthSuccess}
+                                size="small"
+                            />
+                            {/* <Button variant="contained">Facebook</Button> */}
                         </FormControl>
 
                         <FormControl fullWidth sx={{ width: "80%" }}>

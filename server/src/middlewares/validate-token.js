@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const ApiError = require('../util/ApiError');
+const { default: axios } = require("axios");
 
 exports.verifyMyToken = async (req, res, next) => {
     try {
@@ -43,6 +44,18 @@ exports.verifyMyToken = async (req, res, next) => {
             req.auth_type = "google";
             req.email = email;
 
+            next();
+        } else if (bearer['login_type'] === 'facebook'){
+            const response = await axios.get('https://graph.facebook.com/me', {
+                params: {
+                    fields: 'name,email,picture',
+                    access_token: bearer.token,
+                }
+            });
+
+            console.log("User verified from facebook", response.data.email);
+            req.auth_type = 'facebook';
+            req.email = response.data.email
             next();
         }
     } catch (error) {
