@@ -24,6 +24,7 @@ import { useSnackbar } from "notistack";
 import "./MenuForm.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../navbar/NavBar";
+import HelperText from '../shared/HelperText';
 
 const initialFormValues = {
     name: "",
@@ -48,6 +49,9 @@ const MenuForm = () => {
     const [ingredientList, setIngredientList] = useState({});
     const [ingredientForm, setIngredientForm] = useState(initialIngredientForm);
     const [uploadedImages, setUploadedImages] = useState({});
+    const [formErrors, setFormErrors] = useState({});
+    const [ingredientFormErrors, setIngredientFormErrors] = useState({});
+    const [hasErrors, setHasErrors] = useState(true);
 
     const [tempImage, setTempImage] = useState([]);
     const [showIngredientsForm, setShowIngredientsForm] = useState(false);
@@ -113,6 +117,21 @@ const MenuForm = () => {
         setIngredientList(menuItem.ingredients ?? {});
     }, []);
 
+
+    const validateInputs = (name, value) => {
+        if((name === 'name' || name === 'description') && value.length < 3){
+            return `Invalid ${name}`;
+        }
+
+        if((name === 'price' || name === 'preparationTime') && (!(/[0-9]/i.test(value)) || parseFloat(value) < 0)){
+            return `Invalid ${name}`;
+        }     
+        
+        if(name === 'value' && value.length === 0){
+            return `Invalid ${name}`;
+        }
+    }
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
@@ -120,6 +139,11 @@ const MenuForm = () => {
             ...formValues,
             [name]: value,
         });
+
+        setFormErrors({
+            ...formErrors,
+            [name]: validateInputs(name, value),
+        })
     };
 
     const handleCheckboxChange = (e) => {
@@ -163,6 +187,11 @@ const MenuForm = () => {
             ...ingredientForm,
             [name]: value,
         });
+
+        setIngredientFormErrors({
+            ...ingredientFormErrors,
+            [name]: validateInputs(name, value),
+        })
     };
 
     const handleAddIngredient = (e) => {
@@ -187,6 +216,10 @@ const MenuForm = () => {
         delete tempIngredientList[ingredient];
         setIngredientList({ ...tempIngredientList });
     };
+
+    useEffect(() => {
+        setHasErrors(Object.keys(formErrors).some((key) => !!formErrors[key]));
+    }, [formErrors]);
 
     const handleUploadChange = (e) => {
         let { name, value, files } = e.target;
@@ -379,6 +412,10 @@ const MenuForm = () => {
                                 name="name"
                                 value={formValues.name}
                                 onChange={handleInputChange}
+                                error={!!formErrors.name}
+                            />
+                            <HelperText
+                                text={formErrors?.name}
                             />
                         </FormControl>
                         <FormControl fullWidth sx={{ my: 1 }}>
@@ -388,6 +425,10 @@ const MenuForm = () => {
                                 name="description"
                                 value={formValues.description}
                                 onChange={handleInputChange}
+                                error={!!formErrors.description}
+                            />
+                            <HelperText
+                                text={formErrors?.description}
                             />
                         </FormControl>
                         <FormControl sx={{ minWidth: 200, my: 1 }}>
@@ -422,6 +463,10 @@ const MenuForm = () => {
                                 type="number"
                                 value={formValues.price}
                                 onChange={handleInputChange}
+                                error={!!formErrors.price}
+                            />
+                            <HelperText
+                                text={formErrors?.price}
                             />
                         </FormControl>
                         <FormControl fullWidth sx={{ my: 1 }}>
@@ -432,6 +477,10 @@ const MenuForm = () => {
                                 type="number"
                                 value={formValues.preparationTime}
                                 onChange={handleInputChange}
+                                error={!!formErrors.preparationTime}
+                            />
+                            <HelperText
+                                text={formErrors?.preparationTime}
                             />
                         </FormControl>
 
@@ -528,6 +577,9 @@ const MenuForm = () => {
                                                 }
                                                 value={ingredientForm.name}
                                             />
+                                            <HelperText
+                                                text={ingredientFormErrors?.name}
+                                            />
                                         </FormControl>
                                         <FormControl sx={{ mx: 1 }}>
                                             <TextInput
@@ -539,6 +591,9 @@ const MenuForm = () => {
                                                 onChange={
                                                     handleIngredientInputChange
                                                 }
+                                            />
+                                            <HelperText
+                                                text={ingredientFormErrors?.value}
                                             />
                                         </FormControl>
                                         <br />
@@ -794,6 +849,7 @@ const MenuForm = () => {
                             sx={{ mx: 2 }}
                             size="large"
                             type="submit"
+                            disabled={hasErrors}
                         >
                             {editMode ? "Edit" : "Add"}
                         </Button>

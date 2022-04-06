@@ -22,6 +22,7 @@ import { makeStyles } from "@mui/styles";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../navbar/NavBar";
+import Footer from "../footer/Footer";
 
 const useStyles = makeStyles((theme) => ({
     selectDark: {
@@ -113,8 +114,8 @@ const Home = () => {
         }
     };
 
-    useEffect(async () => {
-        await verifyCurrentUser();
+    useEffect(() => {
+        verifyCurrentUser();
         fetchAllItems();
         fetchAllCategories();
     }, []);
@@ -336,6 +337,7 @@ const Home = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Footer />
         </Grid>
     );
 };
