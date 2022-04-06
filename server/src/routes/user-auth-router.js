@@ -199,4 +199,31 @@ userRouter.get("/currentuser", verifyMyToken, (req, res) => {
         });
 });
 
+
+// @GET - User exists or not
+userRouter.get('/exists/:emailId', (req, res, next) => {
+    try {
+        let emailId = req.params.emailId;
+        if(!emailId){
+            return next(ApiError.badRequest('Invalid email id'));
+        }
+
+        UserSchema.findOne({email: emailId, is_deleted: false}, {password: 0})
+            .then((user) => {
+                if(user === null){
+                    return next(ApiError.badRequest('User does not exists'));
+                }
+                return res.status(200).send({success: true, user});
+            })
+            .catch((err) => {
+                console.error("Error occured while fetching user");
+                return next(ApiError.apiInternal('Some error occured'));
+            })
+
+    } catch (error) {
+        console.error("Error while checking user status", error);
+        return next(ApiError.apiInternal('Error while checking user status'));
+    }
+})
+
 module.exports = userRouter;

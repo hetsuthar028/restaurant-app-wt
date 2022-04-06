@@ -17,8 +17,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
-import { GoogleLogin } from 'react-google-login';
-
+import { GoogleLogin } from "react-google-login";
 
 const initialFormValues = {
     email: "",
@@ -37,6 +36,8 @@ const SignUp = () => {
     const [formErrors, setFormErrors] = useState({});
     const [hasErrors, setHasErrors] = useState(true);
     const [showPasswordHelper, setShowPasswordHelper] = useState(false);
+    const [showOtpForm, setShowOtpForm] = useState(false);
+    const [otp, setOtp] = useState('');
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
 
@@ -113,8 +114,56 @@ const SignUp = () => {
         );
     }, [formErrors]);
 
-    const handleRegularSignUp = (e) => {
+    const handleShowOtpForm = (e) => {
         e.preventDefault();
+
+        // Check if the user already exists before sending OTP
+        axios.get(`http://localhost:5001/user/auth/exists/${formValues.email}`)
+            .then((response) => {
+                return enqueueSnackbar('User already exists', { variant: 'warning' });
+            })
+            .catch((existsErr) => {
+
+                if(existsErr?.response?.data?.message === 'User does not exists'){
+                    enqueueSnackbar('Sending email with OTP...', { variant: 'success' });
+                    setShowOtpForm(true);
+                    axios.post(`http://localhost:5001/otp/send`, {
+                        to: formValues.email,
+                    })
+                    .then((response) => {
+                        if(response.data.success === true){
+                            return enqueueSnackbar('Email sent! ✔️', { variant: 'success' });        
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Error occured in sending OTP:", error?.response?.data);
+                        return enqueueSnackbar(error?.response?.data?.message ?? 'Please refresh the page and try again!', { variant: 'warning' });
+                    })
+                    
+                } else {
+                    return enqueueSnackbar('Some error occured, Please try again in a while', { variant: 'error' });
+                }
+            })
+    }
+
+    const handleOtpVerification = (e) => {
+        e.preventDefault();
+        axios.post(`http://localhost:5001/otp/verify`, {
+            email: formValues.email,
+            otp: otp
+        }).then((response) => {
+            console.log("OTP Verification response:", response.data);
+            enqueueSnackbar('OTP verified ✔️', {variant: 'success'});
+            handleRegularSignUp();
+        })
+        .catch((error) => {
+            console.log("Error in verifying otp");
+            enqueueSnackbar('Invalid OTP', {variant: 'error'});
+        })
+    }
+
+    const handleRegularSignUp = () => {
+        // e.preventDefault();
 
         axios
             .post(`http://localhost:5001/user/auth/signup`, {
@@ -124,7 +173,7 @@ const SignUp = () => {
                 enqueueSnackbar("Account created successfully!", {
                     variant: "success",
                 });
-                return navigate('/login');
+                return navigate("/login");
             })
             .catch((err) => {
                 return enqueueSnackbar(
@@ -137,21 +186,21 @@ const SignUp = () => {
     const onGoogleAuthSuccess = (res) => {
         console.log("Google Login:", res);
         console.log("Google Login Success", res.profileObj);
-        let bearer = {login_type: 'google', token: res.tokenId};
-        let {email, name: username, imageUrl: profile_url} = res.profileObj;
+        let bearer = { login_type: "google", token: res.tokenId };
+        let { email, name: username, imageUrl: profile_url } = res.profileObj;
 
         axios
             .post(`http://localhost:5001/user/auth/google/signin`, {
                 email,
                 username,
-                profile_url
+                profile_url,
             })
             .then((response) => {
-                window.localStorage.setItem('bearer', JSON.stringify(bearer));
+                window.localStorage.setItem("bearer", JSON.stringify(bearer));
                 enqueueSnackbar("Google Sign In Successful!", {
                     variant: "success",
                 });
-                return navigate('/home');
+                return navigate("/home");
             })
             .catch((err) => {
                 return enqueueSnackbar(
@@ -159,12 +208,11 @@ const SignUp = () => {
                     { variant: "error" }
                 );
             });
-    }
+    };
 
     const onGoogleAuthFailure = (res) => {
         console.log("Google login failed:", res);
-    }
-
+    };
 
     return (
         <Grid container>
@@ -187,241 +235,275 @@ const SignUp = () => {
                     alignContent: "center",
                 }}
             >
-                <form method="POST" onSubmit={handleRegularSignUp}>
-                    <Typography variant="h3" textAlign="center" my={2} fontFamily="Bartender SmCond Serif Pressed" sx={{color: '#DD7230'}}>
-                        Sign Up
-                    </Typography>
-
-                    <center>
+                <Typography
+                    variant="h3"
+                    textAlign="center"
+                    my={2}
+                    fontFamily="Bartender SmCond Serif Pressed"
+                    sx={{ color: "#DD7230" }}
+                >
+                    Sign Up
+                </Typography>
+                {showOtpForm ? (
+                    <form method="POST" onSubmit={handleOtpVerification}>
+                        <center>
                         <FormControl fullWidth sx={{ width: "80%" }}>
-                            <TextInput
-                                name="email"
-                                placeholder="Email address"
-                                type="email"
-                                label="Email address"
-                                value={formValues.email}
-                                onChange={handleInputChange}
-                                error={!!formErrors.email}
+                                <TextInput
+                                    name="otp"
+                                    placeholder="OTP"
+                                    type="number"
+                                    label="OTP"
+                                    value={otp}
+                                    onChange={(e) => setOtp(parseInt(e.target.value))}
+                                />
+                            </FormControl>
+                            <FormControl fullWidth sx={{ width: "80%" }}>
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    sx={{ backgroundColor: "#DD7230", mt: 2 }}
+                                    type="submit"
+                                    disabled={hasErrors}
+                                >
+                                    Verify
+                                </Button>
+                            </FormControl>
+                        </center>
+                    </form>
+                ) : (
+                    <form onSubmit={handleShowOtpForm}>
+                        <center>
+                            <FormControl fullWidth sx={{ width: "80%" }}>
+                                <TextInput
+                                    name="email"
+                                    placeholder="Email address"
+                                    type="email"
+                                    label="Email address"
+                                    value={formValues.email}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.email}
+                                />
+                            </FormControl>
+                            <Helpertext
+                                text={formErrors.email}
+                                style={{ width: "80%" }}
                             />
-                        </FormControl>
-                        <Helpertext
-                            text={formErrors.email}
-                            style={{ width: "80%" }}
+
+                            <FormControl fullWidth sx={{ width: "80%" }}>
+                                <TextInput
+                                    name="username"
+                                    placeholder="Username"
+                                    label="Username"
+                                    value={formValues.username}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.username}
+                                />
+                            </FormControl>
+                            <Helpertext
+                                text={formErrors.username}
+                                style={{ width: "80%" }}
+                            />
+
+                            <FormControl fullWidth sx={{ width: "80%" }}>
+                                <TextInput
+                                    name="password"
+                                    type="password"
+                                    placeholder="Password"
+                                    label="Password"
+                                    value={formValues.password}
+                                    onChange={handleInputChange}
+                                    error={showPasswordHelper}
+                                />
+                            </FormControl>
+                            {showPasswordHelper && (
+                                <Grid container sx={{ width: "80%", my: 0.5 }}>
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        sm={3}
+                                        md={3}
+                                        textAlign="start"
+                                    >
+                                        {formErrors.password?.alphabet ? (
+                                            <CloseRoundedIcon
+                                                sx={{
+                                                    height: "20px",
+                                                    width: "auto",
+                                                    color: "red",
+                                                    display: "inline",
+                                                }}
+                                            />
+                                        ) : (
+                                            <DoneRoundedIcon
+                                                sx={{
+                                                    height: "20px",
+                                                    width: "auto",
+                                                    color: "green",
+                                                    display: "inline",
+                                                }}
+                                            />
+                                        )}
+                                        <Typography
+                                            variant="caption"
+                                            sx={{ display: "inline" }}
+                                        >
+                                            Alphabets
+                                        </Typography>
+                                    </Grid>
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        sm={3}
+                                        md={3}
+                                        textAlign="start"
+                                    >
+                                        {formErrors.password?.digit ? (
+                                            <CloseRoundedIcon
+                                                sx={{
+                                                    height: "20px",
+                                                    width: "auto",
+                                                    color: "red",
+                                                    display: "inline",
+                                                }}
+                                            />
+                                        ) : (
+                                            <DoneRoundedIcon
+                                                sx={{
+                                                    height: "20px",
+                                                    width: "auto",
+                                                    color: "green",
+                                                    display: "inline",
+                                                }}
+                                            />
+                                        )}
+                                        <Typography
+                                            variant="caption"
+                                            sx={{ display: "inline" }}
+                                        >
+                                            Digits
+                                        </Typography>
+                                    </Grid>
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        sm={3}
+                                        md={3}
+                                        textAlign="start"
+                                    >
+                                        {formErrors.password?.specialChar ? (
+                                            <CloseRoundedIcon
+                                                sx={{
+                                                    height: "20px",
+                                                    width: "auto",
+                                                    color: "red",
+                                                    display: "inline",
+                                                }}
+                                            />
+                                        ) : (
+                                            <DoneRoundedIcon
+                                                sx={{
+                                                    height: "20px",
+                                                    width: "auto",
+                                                    color: "green",
+                                                    display: "inline",
+                                                }}
+                                            />
+                                        )}
+                                        <Typography
+                                            variant="caption"
+                                            sx={{ display: "inline" }}
+                                        >
+                                            Special Characters
+                                        </Typography>
+                                    </Grid>
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        sm={3}
+                                        md={3}
+                                        textAlign="start"
+                                    >
+                                        {formErrors.password?.minlength ? (
+                                            <CloseRoundedIcon
+                                                sx={{
+                                                    height: "20px",
+                                                    width: "auto",
+                                                    color: "red",
+                                                    display: "inline",
+                                                }}
+                                            />
+                                        ) : (
+                                            <DoneRoundedIcon
+                                                sx={{
+                                                    height: "20px",
+                                                    width: "auto",
+                                                    color: "green",
+                                                    display: "inline",
+                                                }}
+                                            />
+                                        )}
+                                        <Typography
+                                            variant="caption"
+                                            sx={{ display: "inline" }}
+                                        >
+                                            More than 8 characters
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            )}
+
+                            <FormControl fullWidth sx={{ width: "80%" }}>
+                                <TextInput
+                                    name="confirmPassword"
+                                    type="password"
+                                    placeholder="Confirm Password"
+                                    label="Confirm Password"
+                                    value={formValues.confirmPassword}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.confirmPassword}
+                                />
+                            </FormControl>
+                            <Helpertext
+                                text={formErrors.confirmPassword}
+                                style={{ width: "80%" }}
+                            />
+
+                            <FormControl fullWidth sx={{ width: "80%" }}>
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    sx={{ backgroundColor: "#DD7230", mt: 2 }}
+                                    type="submit"
+                                    disabled={hasErrors}
+                                >
+                                    Sign Up
+                                </Button>
+                            </FormControl>
+                        </center>
+                    </form>
+                )}
+                <center>
+                    <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
+                        <GoogleLogin
+                            clientId={clientId}
+                            buttonText="Sign in with Google"
+                            onSuccess={onGoogleAuthSuccess}
+                            onFailure={onGoogleAuthFailure}
+                            cookiePolicy={"single_host_origin"}
                         />
+                        {/* <Button variant="contained">Google</Button> */}
+                    </FormControl>
+                    <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
+                        <Button variant="contained">Facebook</Button>
+                    </FormControl>
 
-                        <FormControl fullWidth sx={{ width: "80%" }}>
-                            <TextInput
-                                name="username"
-                                placeholder="Username"
-                                label="Username"
-                                value={formValues.username}
-                                onChange={handleInputChange}
-                                error={!!formErrors.username}
-                            />
-                        </FormControl>
-                        <Helpertext
-                            text={formErrors.username}
-                            style={{ width: "80%" }}
-                        />
-
-                        <FormControl fullWidth sx={{ width: "80%" }}>
-                            <TextInput
-                                name="password"
-                                type="password"
-                                placeholder="Password"
-                                label="Password"
-                                value={formValues.password}
-                                onChange={handleInputChange}
-                                error={showPasswordHelper}
-                            />
-                        </FormControl>
-                        {showPasswordHelper && (
-                            <Grid container sx={{ width: "80%", my: 0.5 }}>
-                                <Grid
-                                    item
-                                    xs={12}
-                                    sm={3}
-                                    md={3}
-                                    textAlign="start"
-                                >
-                                    {formErrors.password?.alphabet ? (
-                                        <CloseRoundedIcon
-                                            sx={{
-                                                height: "20px",
-                                                width: "auto",
-                                                color: "red",
-                                                display: "inline",
-                                            }}
-                                        />
-                                    ) : (
-                                        <DoneRoundedIcon
-                                            sx={{
-                                                height: "20px",
-                                                width: "auto",
-                                                color: "green",
-                                                display: "inline",
-                                            }}
-                                        />
-                                    )}
-                                    <Typography
-                                        variant="caption"
-                                        sx={{ display: "inline" }}
-                                    >
-                                        Alphabets
-                                    </Typography>
-                                </Grid>
-                                <Grid
-                                    item
-                                    xs={12}
-                                    sm={3}
-                                    md={3}
-                                    textAlign="start"
-                                >
-                                    {formErrors.password?.digit ? (
-                                        <CloseRoundedIcon
-                                            sx={{
-                                                height: "20px",
-                                                width: "auto",
-                                                color: "red",
-                                                display: "inline",
-                                            }}
-                                        />
-                                    ) : (
-                                        <DoneRoundedIcon
-                                            sx={{
-                                                height: "20px",
-                                                width: "auto",
-                                                color: "green",
-                                                display: "inline",
-                                            }}
-                                        />
-                                    )}
-                                    <Typography
-                                        variant="caption"
-                                        sx={{ display: "inline" }}
-                                    >
-                                        Digits
-                                    </Typography>
-                                </Grid>
-                                <Grid
-                                    item
-                                    xs={12}
-                                    sm={3}
-                                    md={3}
-                                    textAlign="start"
-                                >
-                                    {formErrors.password?.specialChar ? (
-                                        <CloseRoundedIcon
-                                            sx={{
-                                                height: "20px",
-                                                width: "auto",
-                                                color: "red",
-                                                display: "inline",
-                                            }}
-                                        />
-                                    ) : (
-                                        <DoneRoundedIcon
-                                            sx={{
-                                                height: "20px",
-                                                width: "auto",
-                                                color: "green",
-                                                display: "inline",
-                                            }}
-                                        />
-                                    )}
-                                    <Typography
-                                        variant="caption"
-                                        sx={{ display: "inline" }}
-                                    >
-                                        Special Characters
-                                    </Typography>
-                                </Grid>
-                                <Grid
-                                    item
-                                    xs={12}
-                                    sm={3}
-                                    md={3}
-                                    textAlign="start"
-                                >
-                                    {formErrors.password?.minlength ? (
-                                        <CloseRoundedIcon
-                                            sx={{
-                                                height: "20px",
-                                                width: "auto",
-                                                color: "red",
-                                                display: "inline",
-                                            }}
-                                        />
-                                    ) : (
-                                        <DoneRoundedIcon
-                                            sx={{
-                                                height: "20px",
-                                                width: "auto",
-                                                color: "green",
-                                                display: "inline",
-                                            }}
-                                        />
-                                    )}
-                                    <Typography
-                                        variant="caption"
-                                        sx={{ display: "inline" }}
-                                    >
-                                        More than 8 characters
-                                    </Typography>
-                                </Grid>
-                            </Grid>
-                        )}
-
-                        <FormControl fullWidth sx={{ width: "80%" }}>
-                            <TextInput
-                                name="confirmPassword"
-                                type="password"
-                                placeholder="Confirm Password"
-                                label="Confirm Password"
-                                value={formValues.confirmPassword}
-                                onChange={handleInputChange}
-                                error={!!formErrors.confirmPassword}
-                            />
-                        </FormControl>
-                        <Helpertext
-                            text={formErrors.confirmPassword}
-                            style={{ width: "80%" }}
-                        />
-
-                        <FormControl fullWidth sx={{ width: "80%" }}>
-                            <Button
-                                variant="contained"
-                                size="large"
-                                sx={{ backgroundColor: "#DD7230", mt: 2 }}
-                                type="submit"
-                                disabled={hasErrors}
-                            >
-                                Sign Up
-                            </Button>
-                        </FormControl>
-
-                        <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                            <GoogleLogin
-                                clientId={clientId}
-                                buttonText="Sign in with Google"
-                                onSuccess={onGoogleAuthSuccess}
-                                onFailure={onGoogleAuthFailure}
-                                cookiePolicy={'single_host_origin'}
-                            />
-                            {/* <Button variant="contained">Google</Button> */}
-                        </FormControl>
-                        <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                            <Button variant="contained">Facebook</Button>
-                        </FormControl>
-
-                        <FormControl fullWidth sx={{ width: "80%" }}>
-                            <Typography variant="body1">
-                                Already have an account?{" "}
-                                <Link to="/login">Login here</Link>
-                            </Typography>
-                        </FormControl>
-                    </center>
-                </form>
+                    <FormControl fullWidth sx={{ width: "80%" }}>
+                        <Typography variant="body1">
+                            Already have an account?{" "}
+                            <Link to="/login">Login here</Link>
+                        </Typography>
+                    </FormControl>
+                </center>
             </Grid>
         </Grid>
     );
