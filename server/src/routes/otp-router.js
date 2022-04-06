@@ -1,101 +1,103 @@
-const express = require('express');
+const express = require("express");
 const otpRouter = express.Router();
-const nodemailer = require('nodemailer');
-const redis = require('redis');
-const async = require('async');
-const ApiError = require('../util/ApiError');
-const { default: axios } = require('axios');
-const UserSchema = require('../models/User');
+const nodemailer = require("nodemailer");
+const redis = require("redis");
+const async = require("async");
+const ApiError = require("../util/ApiError");
 
 const redisClient = redis.createClient();
 redisClient.connect();
 
-otpRouter.get('/', (req, res) => {
-    return res.send('Welcome to the email router');
-});
-
 let transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
         user: process.env.SMTP_EMAIL,
         pass: process.env.SMTP_PASSWD,
-    }
+    },
 });
 
-
 // @POST - Send an email with an OTP
-otpRouter.post('/send', (req, res, next) => {
-    let {to: sendTo} = req.body;
+otpRouter.post("/send", (req, res, next) => {
+    let { to: sendTo } = req.body;
 
-    async.waterfall([
-        function(cb){
-            redisClient.exists(sendTo)
-                .then((resp) => {
-                    if(resp === 1){
-                        return cb(true, 'Email already sent!');
-                    }
-                    return cb(null);
-                })
-                .catch((err) => {
-                    console.log("Error in redis:", err);
-                    return cb(true, 'Error in redis');
-                })
-        },
+    async.waterfall(
+        [
+            function (cb) {
+                redisClient
+                    .exists(sendTo)
+                    .then((resp) => {
+                        if (resp === 1) {
+                            return cb(true, "Email already sent!");
+                        }
+                        return cb(null);
+                    })
+                    .catch((err) => {
+                        console.log("Error in redis:", err);
+                        return cb(true, "Error in redis");
+                    });
+            },
 
-        function(cb){
-            let randomOTP = Math.floor(1000 + Math.random() * 9000);
-            let mailOptions = {
-                from: 'hetsuthar18@gnu.ac.im',
-                to: sendTo,
-                subject: "Foodie Restaurant - Email verification",
-                html: `Dear user,
+            function (cb) {
+                let randomOTP = Math.floor(1000 + Math.random() * 9000);
+                let mailOptions = {
+                    from: "hetsuthar18@gnu.ac.im",
+                    to: sendTo,
+                    subject: "Foodie Restaurant - Email verification",
+                    html: `Dear user,
 
                 Your OTP for Foodie Restaurant is - <b>${randomOTP}</b>.<br/>
                 <i>This OPT will expire within 10 minutes!</i>
-                `
+                `,
+                };
+                cb(null, mailOptions, randomOTP);
+            },
+            function (mailOptions, OTP, cb) {
+                transporter
+                    .sendMail(mailOptions)
+                    .then((response) => {
+                        console.log("Email sent", response);
+                        redisClient.set(sendTo, OTP);
+                        redisClient.expire(OTP, 60 * 10);
+                        cb(null, "Email sent successfully!");
+                    })
+                    .catch((error) => {
+                        console.log("Error in sending email", error);
+                        return cb(true, "Error in sending email");
+                    });
+            },
+        ],
+        function (err, data) {
+            console.log(err, data);
+            if (err) {
+                return next(ApiError.badRequest(data));
             }
-            cb(null, mailOptions, randomOTP)
-        },
-        function(mailOptions, OTP, cb){
-            transporter.sendMail(mailOptions).then((response) => {
-                console.log("Email sent", response);
-                redisClient.set(sendTo, OTP);
-                redisClient.expire(OTP, 60*10);
-                cb(null, 'Email sent successfully!');
-            }).catch((error) => {
-                console.log("Error in sending email", error);
-                return cb(true, 'Error in sending email');
-            })
+            return res
+                .status(200)
+                .send({ success: true, message: "Email sent!" });
         }
-    ], function(err, data){
-        console.log(err, data);
-        if(err){
-            return next(ApiError.badRequest(data));
-        }
-        return res.status(200).send({success: true, message: "Email sent!"});
-    })
+    );
 });
 
-
 // @POST - Verify user's OTP
-otpRouter.post('/verify', (req, res, next) => {
-    let {email, otp} = req.body;
-    redisClient.get(email)
+otpRouter.post("/verify", (req, res, next) => {
+    let { email, otp } = req.body;
+    redisClient
+        .get(email)
         .then((resp) => {
             console.log("Verify response", resp);
-            if(resp == otp){
+            if (resp == otp) {
                 redisClient.del(email);
-                return res.status(200).send({success: true, message: "Verified"});
+                return res
+                    .status(200)
+                    .send({ success: true, message: "Verified" });
             } else {
-                return next(ApiError.badRequest('Invalid otp'));
+                return next(ApiError.badRequest("Invalid otp"));
             }
         })
         .catch((err) => {
             console.log("Error in verify:", err);
-        })
-})
-
-
+        });
+});
 
 // @POST - Send an email with link
 // otpRouter.post('/send', (req, res) => {
@@ -149,9 +151,6 @@ otpRouter.post('/verify', (req, res, next) => {
 
 //     // let testAccount = await nodemailer.createTestAccount();
 //     // redisClient.set('hetmewada028@gmail.com', 'Helloworld');
-
-    
-    
 
 //     // let info = await transporter.sendMail({
 //     //     from: 'hetsuthar18@gnu.ac.in',

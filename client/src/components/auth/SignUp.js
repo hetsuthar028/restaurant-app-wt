@@ -116,20 +116,34 @@ const SignUp = () => {
 
     const handleShowOtpForm = (e) => {
         e.preventDefault();
-        enqueueSnackbar('Sending email with OTP...', { variant: 'success' });
-        setShowOtpForm(true);
-        axios.post(`http://localhost:5001/otp/send`, {
-            to: formValues.email,
-        })
-        .then((response) => {
-            if(response.data.success === true){
-                return enqueueSnackbar('Email sent! ✔️', { variant: 'success' });        
-            }
-        })
-        .catch((error) => {
-            console.log("Error occured in sending OTP:", error?.response?.data);
-            return enqueueSnackbar(error?.response?.data?.message ?? 'Please refresh the page and try again!', { variant: 'warning' });
-        })
+
+        // Check if the user already exists before sending OTP
+        axios.get(`http://localhost:5001/user/auth/exists/${formValues.email}`)
+            .then((response) => {
+                return enqueueSnackbar('User already exists', { variant: 'warning' });
+            })
+            .catch((existsErr) => {
+
+                if(existsErr?.response?.data?.message === 'User does not exists'){
+                    enqueueSnackbar('Sending email with OTP...', { variant: 'success' });
+                    setShowOtpForm(true);
+                    axios.post(`http://localhost:5001/otp/send`, {
+                        to: formValues.email,
+                    })
+                    .then((response) => {
+                        if(response.data.success === true){
+                            return enqueueSnackbar('Email sent! ✔️', { variant: 'success' });        
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Error occured in sending OTP:", error?.response?.data);
+                        return enqueueSnackbar(error?.response?.data?.message ?? 'Please refresh the page and try again!', { variant: 'warning' });
+                    })
+                    
+                } else {
+                    return enqueueSnackbar('Some error occured, Please try again in a while', { variant: 'error' });
+                }
+            })
     }
 
     const handleOtpVerification = (e) => {
