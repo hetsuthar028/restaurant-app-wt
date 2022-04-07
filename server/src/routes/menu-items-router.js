@@ -8,11 +8,12 @@ const { v4: uuid4 } = require("uuid");
 const ApiError = require("../util/ApiError");
 const { isAdmin } = require('../middlewares/isAdmin');
 const { verifyMyToken } = require('../middlewares/validate-token');
+const { isSessionActive } = require('../middlewares/isSessionActive');
 
 const PAGE_SIZE = 4;
 
 // @POST - Add a menu item
-menuItemsRouter.post("/add", menuItemValidator, verifyMyToken, isAdmin, (req, res, next) => {
+menuItemsRouter.post("/add", menuItemValidator, verifyMyToken, isSessionActive, isAdmin, (req, res, next) => {
     try {
         MenuItemSchema.create({
             ...req.body,
@@ -38,7 +39,7 @@ menuItemsRouter.post("/add", menuItemValidator, verifyMyToken, isAdmin, (req, re
 });
 
 // @GET - All menu items
-menuItemsRouter.get("/all", verifyMyToken, (req, res, next) => {
+menuItemsRouter.get("/all", verifyMyToken, isSessionActive, (req, res, next) => {
     try {
         let {available, is_veg, category, query, price, size, page} = req.query;
         
@@ -133,7 +134,7 @@ menuItemsRouter.get("/all", verifyMyToken, (req, res, next) => {
 });
 
 // @GET - Menu Item by ID
-menuItemsRouter.get("/id/:menuId", verifyMyToken, (req, res, next) => {
+menuItemsRouter.get("/id/:menuId", verifyMyToken, isSessionActive, (req, res, next) => {
     try {
         let menuId = req.params?.menuId;
         if (!menuId || menuId === undefined) {
@@ -155,7 +156,7 @@ menuItemsRouter.get("/id/:menuId", verifyMyToken, (req, res, next) => {
 });
 
 // @PUT - Edit a menu item
-menuItemsRouter.put("/edit/:menuId", verifyMyToken, isAdmin, (req, res, next) => {
+menuItemsRouter.put("/edit/:menuId", verifyMyToken, isSessionActive, isAdmin, (req, res, next) => {
     try {
         let menuId = req.params?.menuId;
         if (!menuId || menuId === undefined) {
@@ -201,7 +202,7 @@ menuItemsRouter.put("/edit/:menuId", verifyMyToken, isAdmin, (req, res, next) =>
 });
 
 // @DELETE - Delete a menu item
-menuItemsRouter.delete("/delete/:menuId", verifyMyToken, isAdmin, (req, res, next) => {
+menuItemsRouter.delete("/delete/:menuId", verifyMyToken, isSessionActive, isAdmin, (req, res, next) => {
     try {
         let menuId = req.params.menuId;
         if (!menuId || menuId === undefined) {

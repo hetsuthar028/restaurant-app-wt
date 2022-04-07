@@ -4,12 +4,15 @@ const UserSchema = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ApiError = require('../util/ApiError');
+const redisClient = require('../util/redisClient');
+const { SESSION_TTL } = require('../util/sessionData');
 
 // Middleware
 const { userDataValidator } = require("../middlewares/user-validator");
 const { vertifyToken } = require("../middlewares/verify-token");
 const { verifyMyToken } = require("../middlewares/validate-token");
 const { isAdmin } = require('../middlewares/isAdmin');
+const { isSessionActive } = require('../middlewares/isSessionActive');
 const { default: axios } = require("axios");
 
 // @POST - User registration
@@ -78,8 +81,9 @@ userRouter.post("/login", (req, res, next) => {
                     let token = jwt.sign(
                         { userId: user._id },
                         process.env.JWT_SECRET,
-                        { expiresIn: 60 * 60 }
                     );
+                    redisClient.set(user._id, 1);
+                    redisClient.expire(user._id, SESSION_TTL);
                     return res.status(200).send({ success: true, token });
                 }
                 return next(ApiError.badRequest('Invalid email or password'));
@@ -97,7 +101,7 @@ userRouter.post("/login", (req, res, next) => {
 // @POST - Google Sign In
 userRouter.post("/google/signin", (req, res, next) => {
     try {
-        let { email, profile_url, username } = req.body;
+        let { email, profile_url, username, authToken } = req.body;
         let salt = bcrypt.genSaltSync(10);
         let defaultEncryptedPassword = bcrypt.hashSync("Foodie$28", salt);
 
@@ -116,6 +120,8 @@ userRouter.post("/google/signin", (req, res, next) => {
             { upsert: true }
         )
             .then((user) => {
+                redisClient.set(email, 1);
+                redisClient.expire(email, SESSION_TTL);
                 return res.status(201).send({ success: true, user });
             })
             .catch((err) => {
@@ -155,6 +161,8 @@ userRouter.post('/facebook/signin', (req, res, next) => {
                 { upsert: true }
             )
                 .then((user) => {
+                    redisClient.set(email, 1);
+                    redisClient.expire(email, SESSION_TTL);
                     return res.status(201).send({ success: true, user });
                 })
                 .catch((err) => {
@@ -174,7 +182,7 @@ userRouter.post('/facebook/signin', (req, res, next) => {
 })
 
 // @GET - Current user
-userRouter.get("/currentuser", verifyMyToken, (req, res) => {
+userRouter.get("/currentuser", verifyMyToken, isSessionActive, (req, res) => {
     let auth_type = req.auth_type; // normal, google, facebook
     let userId = req.userId;
 

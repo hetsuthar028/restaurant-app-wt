@@ -195,6 +195,7 @@ const SignUp = () => {
                 email,
                 username,
                 profile_url,
+                authToken: res.tokenId
             })
             .then((response) => {
                 window.localStorage.setItem("bearer", JSON.stringify(bearer));
