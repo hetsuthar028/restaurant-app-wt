@@ -24,6 +24,10 @@ class ApiError {
     static apiInternal(message){
         return new ApiError(500, message)
     }
+
+    static sessionTimeout(message){
+        return new ApiError(440, message);
+    }
 }
 
 module.exports = ApiError;

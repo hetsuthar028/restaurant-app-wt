@@ -71,6 +71,10 @@ const Home = () => {
                     enqueueSnackbar('Please login to view home page!', { variant: 'warning' });
                     return navigate('/login');
                 }
+                if(err.response.status === 440){
+                    enqueueSnackbar(err.response?.data?.message, { variant: 'warning' });
+                    return navigate('/login');
+                }
                 console.log(
                     "Error in fetching all items:",
                     err?.response?.data,

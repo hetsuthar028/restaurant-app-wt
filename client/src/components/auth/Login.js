@@ -98,7 +98,8 @@ const Login = () => {
             .post(`http://localhost:5001/user/auth/google/signin`, {
                 email,
                 username,
-                profile_url
+                profile_url,
+                authToken: res.tokenId
             })
             .then((response) => {
                 window.localStorage.setItem('bearer', JSON.stringify(bearer));
