@@ -5,8 +5,10 @@ import PushPinRoundedIcon from "@mui/icons-material/PushPinRounded";
 import QueryBuilderTwoToneIcon from "@mui/icons-material/QueryBuilderTwoTone";
 import Footer from "../footer/Footer";
 import Navbar from "../navbar/NavBar";
+import { useTranslation } from 'react-i18next';
 
 const WelcomePage = () => {
+    const { t } = useTranslation(["welcome", "common"]);
     return (
         <Grid
             container
@@ -29,7 +31,7 @@ const WelcomePage = () => {
                     variant="h1"
                     textAlign="center"
                 >
-                    GOOD TIMES
+                    {t('common:taglinePart1')}
                 </Typography>
                 <Typography
                     fontFamily="Bartender SmCond Serif Pressed"
@@ -37,7 +39,7 @@ const WelcomePage = () => {
                     variant="h6"
                     textAlign="center"
                 >
-                    WITH
+                    {t('common:taglinePart2')}
                 </Typography>
                 <Typography
                     fontFamily="Bartender SmCond Serif Pressed"
@@ -45,7 +47,7 @@ const WelcomePage = () => {
                     variant="h1"
                     textAlign="center"
                 >
-                    GREAT FRIENDS
+                    {t('common:taglinePart3')}
                 </Typography>
 
                 <Grid container my={2}>
@@ -58,10 +60,10 @@ const WelcomePage = () => {
                             sx={{ color: "#ccc" }}
                             variant="h6"
                         >
-                            1510 South Main Street <br />
-                            Las Vegas, NV 89104 <br />
-                            Located inside of Able Baker Brewing <br />
-                            702.479.6355 <br />
+                            {t('welcome:addressPart1')}<br />
+                            {t('welcome:addressPart2')}<br />
+                            {t('welcome:addressPart3')}<br />
+                            {t('welcome:addressPart4')}<br />
                         </Typography>
                     </Grid>
                 </Grid>

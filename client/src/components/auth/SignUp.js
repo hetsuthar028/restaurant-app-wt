@@ -19,6 +19,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import { GoogleLogin } from "react-google-login";
 import FacebookLogin from 'react-facebook-login';
+import { useTranslation } from 'react-i18next';
 
 const initialFormValues = {
     email: "",
@@ -41,6 +42,7 @@ const SignUp = () => {
     const [otp, setOtp] = useState('');
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
+    const { t } = useTranslation(['auth']);
 
     const validateInput = (name, value) => {
         if (name === "email" && !emailRegExp.test(value)) {
@@ -270,7 +272,7 @@ const SignUp = () => {
                     fontFamily="Bartender SmCond Serif Pressed"
                     sx={{ color: "#DD7230" }}
                 >
-                    Sign Up
+                    {t('signup')}
                 </Typography>
                 {showOtpForm ? (
                     <form method="POST" onSubmit={handleOtpVerification}>
@@ -304,9 +306,9 @@ const SignUp = () => {
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="email"
-                                    placeholder="Email address"
+                                    placeholder={t('emailAddress')}
                                     type="email"
-                                    label="Email address"
+                                    label={t('emailAddress')}
                                     value={formValues.email}
                                     onChange={handleInputChange}
                                     error={!!formErrors.email}
@@ -320,8 +322,8 @@ const SignUp = () => {
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="username"
-                                    placeholder="Username"
-                                    label="Username"
+                                    placeholder={t('username')}
+                                    label={t('username')}
                                     value={formValues.username}
                                     onChange={handleInputChange}
                                     error={!!formErrors.username}
@@ -336,8 +338,8 @@ const SignUp = () => {
                                 <TextInput
                                     name="password"
                                     type="password"
-                                    placeholder="Password"
-                                    label="Password"
+                                    placeholder={t('password')}
+                                    label={t('password')}
                                     value={formValues.password}
                                     onChange={handleInputChange}
                                     error={showPasswordHelper}
@@ -484,8 +486,8 @@ const SignUp = () => {
                                 <TextInput
                                     name="confirmPassword"
                                     type="password"
-                                    placeholder="Confirm Password"
-                                    label="Confirm Password"
+                                    placeholder={t('confirmPassword')}
+                                    label={t('confirmPassword')}
                                     value={formValues.confirmPassword}
                                     onChange={handleInputChange}
                                     error={!!formErrors.confirmPassword}
@@ -504,7 +506,7 @@ const SignUp = () => {
                                     type="submit"
                                     disabled={hasErrors}
                                 >
-                                    Sign Up
+                                    {t('signup')}
                                 </Button>
                             </FormControl>
                         </center>
@@ -514,7 +516,7 @@ const SignUp = () => {
                     <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
                         <GoogleLogin
                             clientId={clientId}
-                            buttonText="Sign in with Google"
+                            buttonText={t('signInWithGoogle')}
                             onSuccess={onGoogleAuthSuccess}
                             onFailure={onGoogleAuthFailure}
                             cookiePolicy={"single_host_origin"}

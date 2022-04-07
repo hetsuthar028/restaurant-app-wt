@@ -13,6 +13,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { GoogleLogin } from 'react-google-login';
 import FacebookLogin from 'react-facebook-login';
+import { useTranslation } from 'react-i18next';
 
 const initialFormValues = {
     email: "",
@@ -30,6 +31,7 @@ const Login = () => {
     const [hasErrors, setHasErrors] = useState(true);
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
+    const { t } = useTranslation(["auth"]);
 
     const validateInput = (name, value) => {
         if (name === "email" && !emailRegExp.test(value)) {
@@ -171,16 +173,16 @@ const Login = () => {
             >
                 <form method="POST" onSubmit={handleRegularLogin}>
                     <Typography variant="h4" textAlign="center" my={2}>
-                        Log In
+                        {t('login')}
                     </Typography>
 
                     <center>
                         <FormControl fullWidth sx={{ width: "80%" }}>
                             <TextInput
                                 name="email"
-                                placeholder="Email address"
+                                placeholder={t('emailAddress')}
                                 type="email"
-                                label="Email address"
+                                label={t('emailAddress')}
                                 value={formValues.email}
                                 onChange={handleInputChange}
                                 error={!!formErrors.email}
@@ -194,9 +196,9 @@ const Login = () => {
                         <FormControl fullWidth sx={{ width: "80%" }}>
                             <TextInput
                                 name="password"
-                                placeholder="Password"
+                                placeholder={t('password')}
                                 type="password"
-                                label="Password"
+                                label={t('password')}
                                 value={formValues.password}
                                 onChange={handleInputChange}
                                 error={!!formErrors.password}
@@ -209,7 +211,7 @@ const Login = () => {
 
                         <FormControl fullWidth sx={{ width: "80%" }}>
                             <Typography textAlign="end">
-                                <Link to="/">Forgot Password?</Link>
+                                <Link to="/">{t('forgotPassword')}</Link>
                             </Typography>
                         </FormControl>
 
@@ -221,14 +223,14 @@ const Login = () => {
                                 type="submit"
                                 disabled={hasErrors}
                             >
-                                Log In
+                                {t('login')}
                             </Button>
                         </FormControl>
 
                         <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
                             <GoogleLogin
                                 clientId={clientId}
-                                buttonText="Sign in with Google"
+                                buttonText={t('signInWithGoogle')}
                                 onSuccess={onGoogleAuthSuccess}
                                 onFailure={onGoogleAuthFailure}
                                 cookiePolicy={'single_host_origin'}
