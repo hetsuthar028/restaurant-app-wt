@@ -40,13 +40,13 @@ otpRouter.post("/send", (req, res, next) => {
             function (cb) {
                 let randomOTP = Math.floor(1000 + Math.random() * 9000);
                 let mailOptions = {
-                    from: "hetsuthar18@gnu.ac.im",
+                    from: process.env.SMTP_EMAIL,
                     to: sendTo,
                     subject: "Foodie Restaurant - Email verification",
                     html: `Dear user,
 
                 Your OTP for Foodie Restaurant is - <b>${randomOTP}</b>.<br/>
-                <i>This OPT will expire within 10 minutes!</i>
+                <i>This OPT will expire within 5 minutes!</i>
                 `,
                 };
                 cb(null, mailOptions, randomOTP);
@@ -57,7 +57,7 @@ otpRouter.post("/send", (req, res, next) => {
                     .then((response) => {
                         console.log("Email sent", response);
                         redisClient.set(sendTo, OTP);
-                        redisClient.expire(OTP, 60 * 10);
+                        redisClient.expire(sendTo, 60 * 5);
                         cb(null, "Email sent successfully!");
                     })
                     .catch((error) => {

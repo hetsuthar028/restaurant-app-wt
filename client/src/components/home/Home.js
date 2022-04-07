@@ -299,6 +299,15 @@ const Home = () => {
                     </FormControl>
                 </Grid>
             </Grid>
+            <Grid item xs={12} sm={12} md={12} my={2}>
+                {allItems.length === 0 && (
+                    <center>
+                        <Typography fontFamily="Bartender SmCond Serif Pressed" variant="h3" sx={{color: '#ccc'}}>
+                            Oops! No menu items found.
+                        </Typography>
+                    </center>
+                )}
+            </Grid>
             {allCategories.map((category) => (
                 <CategorySection
                     items={allItems.filter(
