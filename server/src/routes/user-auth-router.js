@@ -234,4 +234,28 @@ userRouter.get('/exists/:emailId', (req, res, next) => {
     }
 })
 
+
+// @PUT - Password change request
+userRouter.put('/password', (req, res, next) => {
+    try {
+        let salt = bcrypt.genSaltSync(10);
+        let encryptedPassword = bcrypt.hashSync(req.body.password, salt);
+
+        UserSchema.updateOne({email: req.body.email, auth_type: "normal", is_deleted: false}, {$set: {password: encryptedPassword}})
+            .then((updateResp) => {
+                if(updateResp.modifiedCount === 1){
+                    return res.status(200).send({success: true, message: "Password changed successfully!"});
+                }
+                return next(ApiError.badRequest('Password can\'t be changed'));
+            })
+            .catch((updateErr) => {
+                console.log("Update password Error:", updateErr);
+                return next(ApiError.badRequest('Password can\'t be changed'));
+            })
+    } catch (error) {
+        console.error("Error while changing password", error);
+        return next(ApiError.apiInternal('Error while changing password'));
+    }
+})
+
 module.exports = userRouter;
