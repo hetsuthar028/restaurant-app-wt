@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Grid, Typography, Divider, Button } from "@mui/material";
 import ItemCard from "../menu-item/ItemCard";
+import { useTranslation } from 'react-i18next';
 
 const RECORDS_PER_PAGE = 4;
 
@@ -9,6 +10,7 @@ const CategorySection = (props) => {
 
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const { t } = useTranslation(["home"]);
 
     const handlePageChange = (toPage) => {
         if (toPage === currentPage) {
@@ -31,7 +33,7 @@ const CategorySection = (props) => {
                     my={1}
                     sx={{color: '#DD7230'}}
                 >
-                    {category.name}
+                    {t(`home:${category.name.toString().toLowerCase()}`)}
                 </Typography>
                 <Divider sx={{ mx: 2, background: '#DD7230' }} />
 

@@ -82,7 +82,7 @@ const WelcomePage = () => {
                             12PM-10PM
                             <br />
                             <span style={{ color: "#DD7230" }}>
-                                SUNDAY:
+                                {t('welcome:sunday')}:
                             </span>{" "}
                             10AM-11:30PM
                             <br />

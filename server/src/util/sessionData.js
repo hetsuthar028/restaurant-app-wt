@@ -1,3 +1,3 @@
 module.exports = {
-    SESSION_TTL: 60
+    SESSION_TTL: 60 * 15
 }

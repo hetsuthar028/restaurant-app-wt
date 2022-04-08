@@ -25,6 +25,7 @@ import "./MenuForm.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../navbar/NavBar";
 import HelperText from '../shared/HelperText';
+import { useTranslation } from 'react-i18next';
 
 const initialFormValues = {
     name: "",
@@ -63,6 +64,7 @@ const MenuForm = () => {
     const { enqueueSnackbar } = useSnackbar();
     const location = useLocation();
     const navigate = useNavigate();
+    const { t } = useTranslation(["item", "home", "common"]);
 
     const fetchAllCategories = () => {
         axios
@@ -393,10 +395,10 @@ const MenuForm = () => {
                     fontFamily="Bebas Neue"
                     textAlign="center"
                 >
-                    {editMode ? "Edit" : "Add"} a Menu Item
+                    {editMode ? t('item:formTitleEdit') : t('item:formTitleAdd')}
                 </Typography>
                 <Divider sx={{ my: 1 }}>
-                    <Chip label="Item Details" />
+                    <Chip label={t('item:formSubtitle')} />
                 </Divider>
             </Grid>
             <Grid item xs={12} sm={12} md={12}>
@@ -407,8 +409,8 @@ const MenuForm = () => {
                     <Grid item xs={8} md={8} sm={8} my={2} sx={{ px: 2 }}>
                         <FormControl fullWidth sx={{ my: 1 }}>
                             <TextInput
-                                placeholder="Item Name"
-                                label="Item Name"
+                                placeholder={t('item:itemName')}
+                                label={t('item:itemName')}
                                 name="name"
                                 value={formValues.name}
                                 onChange={handleInputChange}
@@ -420,8 +422,8 @@ const MenuForm = () => {
                         </FormControl>
                         <FormControl fullWidth sx={{ my: 1 }}>
                             <TextInput
-                                placeholder="Description"
-                                label="Description"
+                                placeholder={t('item:description')}
+                                label={t('item:description')}
                                 name="description"
                                 value={formValues.description}
                                 onChange={handleInputChange}
@@ -433,12 +435,12 @@ const MenuForm = () => {
                         </FormControl>
                         <FormControl sx={{ minWidth: 200, my: 1 }}>
                             <InputLabel id="demo-simple-select-label">
-                                Course Type
+                                {t('item:courseType')}
                             </InputLabel>
                             <Select
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
-                                label="Course Type"
+                                label={t('item:courseType')}
                                 defaultValue={""}
                                 required
                                 name="category"
@@ -450,15 +452,15 @@ const MenuForm = () => {
                                         key={category._id}
                                         value={category._id}
                                     >
-                                        {category.name}
+                                        {t(`home:${category.name.toString().toLowerCase()}`)}
                                     </MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
                         <FormControl fullWidth sx={{ my: 1 }}>
                             <TextInput
-                                placeholder="Price (₹)"
-                                label="Price (₹)"
+                                placeholder={t('item:price')}
+                                label={t('item:price')}
                                 name="price"
                                 type="number"
                                 value={formValues.price}
@@ -471,8 +473,8 @@ const MenuForm = () => {
                         </FormControl>
                         <FormControl fullWidth sx={{ my: 1 }}>
                             <TextInput
-                                placeholder="Preparation Time (In minutes)"
-                                label="Preparation Time (In minutes)"
+                                placeholder={t('item:preparationTime')}
+                                label={t('item:preparationTime')}
                                 name="preparationTime"
                                 type="number"
                                 value={formValues.preparationTime}
@@ -493,7 +495,7 @@ const MenuForm = () => {
                                     <Checkbox checked={formValues.available} />
                                 }
                                 name="available"
-                                label="Available"
+                                label={t("home:available")}
                                 onChange={handleCheckboxChange}
                             />
                         </FormGroup>
@@ -508,13 +510,13 @@ const MenuForm = () => {
                                 <FormControlLabel
                                     value={true}
                                     control={<Radio />}
-                                    label="Veg"
+                                    label={t('home:veg')}
                                     name="is_veg"
                                 />
                                 <FormControlLabel
                                     value={false}
                                     control={<Radio />}
-                                    label="Non-veg"
+                                    label={t('home:nonVeg')}
                                     name="is_veg"
                                 />
                             </RadioGroup>
@@ -535,7 +537,7 @@ const MenuForm = () => {
                         <Grid container my={2}>
                             <Grid item xs={4} sm={6} md={2} textAlign="start">
                                 <Typography variant="h6">
-                                    Ingredients
+                                    {t('item:ingredient', {count: 2})}
                                 </Typography>
                             </Grid>
                             <Grid item xs={8} sm={6} md={10}>
@@ -548,7 +550,7 @@ const MenuForm = () => {
                                     }
                                 >
                                     {/* ➕ */}
-                                    Add an Ingredient
+                                    {t('item:addAnIngredient')}
                                 </Button>
                             </Grid>
                         </Grid>
@@ -564,13 +566,13 @@ const MenuForm = () => {
                                         textAlign="center"
                                     >
                                         <Typography variant="body1">
-                                            Ingredient
+                                            {t('item:ingredient', {count: 1})}
                                         </Typography>
                                         <FormControl sx={{ mx: 1 }}>
                                             <TextInput
                                                 size="small"
-                                                placeholder="Ingredient Name"
-                                                label="Ingredient Name"
+                                                placeholder={`${t('item:ingredient', {count: 1})} ${t('item:name')}`}
+                                                label={`${t('item:ingredient', {count: 1})} ${t('item:name')}`}
                                                 name="name"
                                                 onChange={
                                                     handleIngredientInputChange
@@ -584,8 +586,8 @@ const MenuForm = () => {
                                         <FormControl sx={{ mx: 1 }}>
                                             <TextInput
                                                 size="small"
-                                                placeholder="Amount / quantity"
-                                                label="Amount / quantity"
+                                                placeholder={`${t('item:amount')} / ${t('item:quantity')}`}
+                                                label={`${t('item:amount')} / ${t('item:quantity')}`}
                                                 name="value"
                                                 value={ingredientForm.value}
                                                 onChange={
@@ -603,7 +605,7 @@ const MenuForm = () => {
                                                 sx={{ m: 1 }}
                                                 onClick={handleAddIngredient}
                                             >
-                                                Add
+                                                {t('common:add')}
                                             </Button>
                                             <Button
                                                 variant="contained"
@@ -614,7 +616,7 @@ const MenuForm = () => {
                                                     )
                                                 }
                                             >
-                                                Cancel
+                                                {t('common:cancel')}
                                             </Button>
                                         </FormControl>
                                     </Grid>
@@ -673,7 +675,7 @@ const MenuForm = () => {
                         <Divider sx={{ my: 1 }} />
 
                         {/* Recipe section */}
-                        <Typography variant="h6">Recipe</Typography>
+                        <Typography variant="h6">{t('item:recipe')}</Typography>
 
                         <Grid container my={2}>
                             {[...Array(recipeListCount).keys()].map((count) => (
@@ -686,7 +688,7 @@ const MenuForm = () => {
                                         sx={{ my: 1 }}
                                     >
                                         <Button variant="contained">
-                                            Step - {count + 1}
+                                            {t('item:step')} - {count + 1}
                                         </Button>
                                     </Grid>
                                     <Grid
@@ -723,10 +725,10 @@ const MenuForm = () => {
                                     >
                                         <FormControl fullWidth sx={{ my: 1 }}>
                                             <TextInput
-                                                placeholder={`Recipe Step - ${
+                                                placeholder={`${t('item:recipe')} ${t('item:step')} - ${
                                                     count + 1
                                                 }`}
-                                                label={`Recipe Step - ${
+                                                label={`${t('item:recipe')} ${t('item:step')} - ${
                                                     count + 1
                                                 }`}
                                                 name={`recipe${count}`}
@@ -743,7 +745,7 @@ const MenuForm = () => {
 
                         {/* Images section */}
                         <Typography variant="h6" my={1}>
-                            Images
+                            {t('item:images')}
                         </Typography>
 
                         <input
@@ -851,7 +853,7 @@ const MenuForm = () => {
                             type="submit"
                             disabled={hasErrors}
                         >
-                            {editMode ? "Edit" : "Add"}
+                            {t(`common:${(editMode ? "Edit" : "Add").toLowerCase()}`)}
                         </Button>
                         <Button
                             variant="contained"
@@ -859,7 +861,7 @@ const MenuForm = () => {
                             size="large"
                             onClick={() => navigate("/home")}
                         >
-                            Cancel
+                            {t('common:cancel')}
                         </Button>
                     </Grid>
                 </Grid>

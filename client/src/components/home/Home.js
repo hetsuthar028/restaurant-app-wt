@@ -23,6 +23,7 @@ import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../navbar/NavBar";
 import Footer from "../footer/Footer";
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
     selectDark: {
@@ -49,6 +50,7 @@ const Home = () => {
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [toDeleteItem, setToDeleteItem] = useState("");
     const [isAdmin, setIsAdmin] = useState(false);
+    const { t } = useTranslation(["home", "common"]);
 
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
@@ -200,8 +202,8 @@ const Home = () => {
                     <form method='POST'>
                     <FormControl fullWidth sx={{ mx: 1, width: "80%" }}>
                         <TextInput
-                            placeholder="Search Food Items"
-                            label="Search Food Items"
+                            placeholder={t('home:searchFoodItems')}
+                            label={t('home:searchFoodItems')}
                             name="query"
                             size="small"
                             value={filters.query}
@@ -217,66 +219,66 @@ const Home = () => {
                         <InputLabel id="demo-simple-select-label" sx={{
                             color: 'white'
                         }}>
-                            Price
+                            {t('home:Price')}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={availability}
-                            label="Price"
+                            label={t('home:Price')}
                             name="price"
                             size="small"
                             onChange={handleFilterChange}
                             className={classes.selectDark}
                         >
                             <MenuItem value={0}>-</MenuItem>
-                            <MenuItem value={1}>Low to High</MenuItem>
-                            <MenuItem value={-1}>High to Low</MenuItem>
+                            <MenuItem value={1}>{t('home:lowToHigh')}</MenuItem>
+                            <MenuItem value={-1}>{t('home:highToLow')}</MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl sx={{ minWidth: 120, mx: 1, }}>
                         <InputLabel id="demo-simple-select-label" sx={{
                             color: 'white'
                         }}>
-                            Availability
+                            {t('home:availability')}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={availability}
-                            label="Availability"
+                            label={t('home:availability')}
                             size="small"
                             name="available"
                             onChange={handleFilterChange}
                             className={classes.selectDark}
                         >
-                            <MenuItem value={"all"}>All</MenuItem>
-                            <MenuItem value={true}>Available</MenuItem>
-                            <MenuItem value={false}>Not available</MenuItem>
+                            <MenuItem value={"all"}>{t('home:all')}</MenuItem>
+                            <MenuItem value={true}>{t('home:available')}</MenuItem>
+                            <MenuItem value={false}>{t('home:notAvailable')}</MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl sx={{ minWidth: 120, mx: 1 }}>
                         <InputLabel id="demo-simple-select-label" sx={{
                             color: 'white'
                         }}>
-                            Course
+                            {t('home:course')}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
-                            label="Course"
+                            label={t('home:course')}
                             name="category"
                             size="small"
                             onChange={handleFilterChange}
                             className={classes.selectDark}
                         >
-                            <MenuItem value={"all"}>All</MenuItem>
+                            <MenuItem value={"all"}>{t('home:all')}</MenuItem>
                             {allCategories.map((category) => (
                                 <MenuItem
                                     value={category._id}
                                     key={category._id}
                                 >
-                                    {category.name}
+                                    {t(`home:${category.name.toString().toLowerCase()}`)}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -285,20 +287,20 @@ const Home = () => {
                         <InputLabel id="demo-simple-select-label" sx={{
                             color: 'white'
                         }}>
-                            Veg or Non-veg
+                            {t('home:vegOrNonVeg')}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
-                            label="Veg or Non-veg"
+                            label={t('home:vegOrNonVeg')}
                             size="small"
                             name="is_veg"
                             onChange={handleFilterChange}
                             className={classes.selectDark}
                         >
-                            <MenuItem value={"all"}>All</MenuItem>
-                            <MenuItem value={true}>Veg</MenuItem>
-                            <MenuItem value={false}>Non-veg</MenuItem>
+                            <MenuItem value={"all"}>{t('home:all')}</MenuItem>
+                            <MenuItem value={true}>{t('home:veg')}</MenuItem>
+                            <MenuItem value={false}>{t('home:nonVeg')}</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
@@ -307,7 +309,7 @@ const Home = () => {
                 {allItems.length === 0 && (
                     <center>
                         <Typography fontFamily="Bartender SmCond Serif Pressed" variant="h3" sx={{color: '#ccc'}}>
-                            Oops! No menu items found.
+                            {t('home:noMenuFoundMessage')}
                         </Typography>
                     </center>
                 )}
@@ -336,17 +338,15 @@ const Home = () => {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        Click on delete button to remove this menu item from the
-                        list. Doing this will remove item from records and won't
-                        be available later!
+                        {t('home:deleteWarning')}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>
-                        Cancel
+                        {t('common:cancel')}
                     </Button>
                     <Button onClick={() => handleItemDelete()} autoFocus>
-                        Delete
+                        {t('common:delete')}
                     </Button>
                 </DialogActions>
             </Dialog>
