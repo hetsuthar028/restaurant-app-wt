@@ -1,0 +1,12 @@
+{
+    "signup": "S'inscrire",
+    "emailAddress": "Adresse e-mail",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmez le mot de passe",
+    "alreadyHaveAnAccount": "Vous avez déjà un compte? Connectez-vous ici",
+    "dontHaveAnAccount": "Vous n'avez pas de compte ? Inscrivez-vous ici",
+    "forgotPassword": "Mot de passe oublié?",
+    "signInWithGoogle": "Connectez-vous avec Google",
+    "login": "Connexion"
+}

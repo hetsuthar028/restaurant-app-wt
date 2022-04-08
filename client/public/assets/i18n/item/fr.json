@@ -1,0 +1,20 @@
+{
+    "formTitleAdd": "Ajouter un élément de menu",
+    "formTitleEdit": "Modifier un élément de menu",
+    "formSubtitle": "Détails de l'article",
+    "itemName": "Nom de l'article",
+    "description": "La description",
+    "courseType": "Type de cours",
+    "price": "Prix (₹)",
+    "preparationTime": "Temps de préparation (en minutes)",
+    "jain": "Jain",
+    "ingredient_one": "Ingrédient",
+    "ingredient_other": "Ingrédients",
+    "addAnIngredient": "Ajouter un ingrédient",
+    "recipe": "Recette",
+    "step": "Étape",
+    "images": "Images",
+    "name": "Nom",
+    "amount": "Montant",
+    "quantity": "Quantité"
+}

@@ -16,6 +16,7 @@ import Logout from "@mui/icons-material/Logout";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -26,6 +27,7 @@ const Navbar = () => {
     const open = Boolean(anchorEl);
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
+    const { t } = useTranslation(["auth", "nav"]);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -100,7 +102,7 @@ const Navbar = () => {
                             to="/home"
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
-                            Home
+                            {t('nav:home')}
                         </Link>
                     </Typography>
                 )}
@@ -115,7 +117,7 @@ const Navbar = () => {
                             to="/menu/add"
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
-                            Add menu
+                            {t('nav:addMenu')}
                         </Link>
                     </Typography>
                 )}
@@ -125,14 +127,14 @@ const Navbar = () => {
                     fontFamily="Bartender Serif"
                     sx={{ mx: 2 }}
                 >
-                    Contact Us
+                    {t('nav:contactUs')}
                 </Typography>
                 <Typography
                     variant="h5"
                     fontFamily="Bartender Serif"
                     sx={{ mx: 2 }}
                 >
-                    About Us
+                    {t('nav:aboutUs')}
                 </Typography>
             </Grid>
 
@@ -253,7 +255,7 @@ const Navbar = () => {
                                     color: "inherit",
                                 }}
                             >
-                                Sign Up
+                                {t('auth:signup')}
                             </Link>
                         </Button>
                         <Button
@@ -270,7 +272,7 @@ const Navbar = () => {
                                     color: "inherit",
                                 }}
                             >
-                                Log In
+                                {t('auth:login')}
                             </Link>
                         </Button>
                     </React.Fragment>
