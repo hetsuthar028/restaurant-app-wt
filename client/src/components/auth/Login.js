@@ -184,6 +184,10 @@ const Login = () => {
             )
             .then((response) => {
                 // User exists
+                if(response.data.user.auth_type != 'normal'){
+                    return enqueueSnackbar('Invalid password change request for this account', { variant: "warning" });
+                }
+
                 enqueueSnackbar("Sending OTP via Email", {
                     variant: "success",
                 });
@@ -373,16 +377,16 @@ const Login = () => {
                 {showForgotForm && (
                     <form method="POST" onSubmit={handleSendOTP}>
                         <Typography variant="h4" textAlign="center" my={2}>
-                            Forgot Password
+                            {t('forgotPassword')}
                         </Typography>
 
                         <center>
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="email"
-                                    placeholder="Email address"
+                                    placeholder={t('emailAddress')}
                                     type="email"
-                                    label="Email address"
+                                    label={t('emailAddress')}
                                     value={forgotPasswordData?.email}
                                     onChange={handleForgotFormInputChange}
                                 />
@@ -397,7 +401,7 @@ const Login = () => {
                                     }}
                                     type="submit"
                                 >
-                                    Get OTP
+                                    {t('getOTP')}
                                 </Button>
                             </FormControl>
                         </center>
@@ -408,7 +412,7 @@ const Login = () => {
                 {showOTPForm && (
                     <form method="POST" onSubmit={handleVerifyOTP}>
                         <Typography variant="h4" textAlign="center" my={2}>
-                            Forgot Password
+                            {t('forgotPassword')}
                         </Typography>
 
                         <center>
@@ -432,7 +436,7 @@ const Login = () => {
                                     }}
                                     type="submit"
                                 >
-                                    Verify OTP
+                                    {t('verifyOTP')}
                                 </Button>
                             </FormControl>
                         </center>
@@ -443,15 +447,15 @@ const Login = () => {
                 {showResetPwdForm && (
                     <form method="POST" onSubmit={handlePasswordChange}>
                         <Typography variant="h4" textAlign="center" my={2}>
-                            Forgot Password
+                            {t('forgotPassword')}
                         </Typography>
                         <center>
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="password"
-                                    placeholder="New Password"
+                                    placeholder={t('newPassword')}
                                     type="password"
-                                    label="New Password"
+                                    label={t('newPassword')}
                                     value={forgotPasswordData.password}
                                     onChange={handleForgotFormInputChange}
                                 />
@@ -466,7 +470,7 @@ const Login = () => {
                                     }}
                                     type="submit"
                                 >
-                                    Change Password
+                                    {t('changePassword')}
                                 </Button>
                             </FormControl>
                         </center>
@@ -477,7 +481,7 @@ const Login = () => {
                     <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
                         <GoogleLogin
                             clientId={clientId}
-                            buttonText="Sign in with Google"
+                            buttonText={t('signInWithGoogle')}
                             onSuccess={onGoogleAuthSuccess}
                             onFailure={onGoogleAuthFailure}
                             cookiePolicy={"single_host_origin"}
