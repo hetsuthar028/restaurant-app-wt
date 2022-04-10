@@ -10,20 +10,19 @@ import {
     ListItemIcon,
     Divider,
 } from "@mui/material";
-import PersonAdd from "@mui/icons-material/PersonAdd";
 import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [profileUrl, setProfileUrl] = useState("");
-    const [authType, setAuthType] = useState("normal");
     const [anchorEl, setAnchorEl] = React.useState(null);
+
     const open = Boolean(anchorEl);
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
@@ -49,11 +48,9 @@ const Navbar = () => {
             setIsAdmin(response.data.user.is_admin);
             setIsLoggedIn(true);
             setProfileUrl(response.data.user.profile_url);
-            console.log("Profile URL", response.data.user.profile_url);
-            console.log("Auth Type", response.data.user.auth_type);
             return;
         } catch (error) {
-            console.log("Error fetching current user in home:", error);
+            console.error("Error fetching current user in home:", error);
             setIsAdmin(false);
             setIsLoggedIn(false);
         }
@@ -102,7 +99,7 @@ const Navbar = () => {
                             to="/home"
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
-                            {t('nav:home')}
+                            {t("nav:home")}
                         </Link>
                     </Typography>
                 )}
@@ -117,7 +114,7 @@ const Navbar = () => {
                             to="/menu/add"
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
-                            {t('nav:addMenu')}
+                            {t("nav:addMenu")}
                         </Link>
                     </Typography>
                 )}
@@ -127,14 +124,14 @@ const Navbar = () => {
                     fontFamily="Bartender Serif"
                     sx={{ mx: 2 }}
                 >
-                    {t('nav:contactUs')}
+                    {t("nav:contactUs")}
                 </Typography>
                 <Typography
                     variant="h5"
                     fontFamily="Bartender Serif"
                     sx={{ mx: 2 }}
                 >
-                    {t('nav:aboutUs')}
+                    {t("nav:aboutUs")}
                 </Typography>
             </Grid>
 
@@ -215,16 +212,7 @@ const Navbar = () => {
                             <MenuItem>
                                 <Avatar /> Profile
                             </MenuItem>
-                            {/* <MenuItem>
-                                <Avatar /> My account
-                            </MenuItem> */}
                             <Divider />
-                            {/* <MenuItem>
-                                <ListItemIcon>
-                                    <PersonAdd fontSize="small" />
-                                </ListItemIcon>
-                                Add another account
-                            </MenuItem> */}
                             <MenuItem>
                                 <ListItemIcon>
                                     <Settings fontSize="small" />
@@ -255,7 +243,7 @@ const Navbar = () => {
                                     color: "inherit",
                                 }}
                             >
-                                {t('auth:signup')}
+                                {t("auth:signup")}
                             </Link>
                         </Button>
                         <Button
@@ -272,7 +260,7 @@ const Navbar = () => {
                                     color: "inherit",
                                 }}
                             >
-                                {t('auth:login')}
+                                {t("auth:login")}
                             </Link>
                         </Button>
                     </React.Fragment>

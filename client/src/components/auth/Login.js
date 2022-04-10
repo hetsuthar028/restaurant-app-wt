@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-    Grid,
-    Typography,
-    Button,
-    FormControl,
-    TextField,
-} from "@mui/material";
+import { Grid, Typography, Button, FormControl } from "@mui/material";
 import HelperText from "../shared/HelperText";
 import TextInput from "../shared/TextInput";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSnackbar } from "notistack";
-import { GoogleLogin } from 'react-google-login';
-import FacebookLogin from 'react-facebook-login';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
+import GoogleSignIn from "./GoogleSignIn";
+import FacebookSignIn from "./FacebookSignIn";
 
 const initialFormValues = {
     email: "",
@@ -28,8 +22,6 @@ const initialForgotPasswordValues = {
 
 const emailRegExp =
     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-
-const clientId = process.env.REACT_APP_GOOGLE_CLIENTID;
 
 const Login = () => {
     const [formValues, setFormValues] = useState(initialFormValues);
@@ -93,7 +85,6 @@ const Login = () => {
                 ...formValues,
             })
             .then((response) => {
-                console.log("Login response", response.data);
                 let bearer = {
                     login_type: "normal",
                     token: response.data.token,
@@ -105,68 +96,7 @@ const Login = () => {
                 return navigate("/home");
             })
             .catch((err) => {
-                console.log("Error while Logging in", err?.response.data);
-                return enqueueSnackbar(
-                    err?.response?.data?.message ?? "Please try again!",
-                    { variant: "error" }
-                );
-            });
-    };
-
-    const onGoogleAuthSuccess = (res) => {
-        console.log("Google Login:", res);
-        console.log("Google Login Success", res.profileObj);
-        let bearer = { login_type: "google", token: res.tokenId };
-        let { email, name: username, imageUrl: profile_url } = res.profileObj;
-
-        axios
-            .post(`http://localhost:5001/user/auth/google/signin`, {
-                email,
-                username,
-                profile_url,
-                authToken: res.tokenId,
-            })
-            .then((response) => {
-                window.localStorage.setItem("bearer", JSON.stringify(bearer));
-
-                enqueueSnackbar("Google Sign In Successful!", {
-                    variant: "success",
-                });
-                return navigate("/home");
-            })
-            .catch((err) => {
-                return enqueueSnackbar(
-                    err?.response?.data?.message ?? "Please try again!",
-                    { variant: "error" }
-                );
-            });
-    };
-
-    const onGoogleAuthFailure = (res) => {
-        console.log("Google login failed:", res);
-    };
-
-    const onFacebookAuthSuccess = (response) => {
-        console.log("Facebook auth response:", response);
-        let { name, picture, email, accessToken, id } = response;
-        let bearer = { login_type: "facebook", token: accessToken };
-
-        axios
-            .post(`http://localhost:5001/user/auth/facebook/signin`, {
-                email,
-                name,
-                picture: picture.data.url,
-                id,
-                accessToken,
-            })
-            .then((response) => {
-                window.localStorage.setItem("bearer", JSON.stringify(bearer));
-                enqueueSnackbar("Facebook Sign In Successful!", {
-                    variant: "success",
-                });
-                return navigate("/home");
-            })
-            .catch((err) => {
+                console.error("Error while Logging in", err?.response.data);
                 return enqueueSnackbar(
                     err?.response?.data?.message ?? "Please try again!",
                     { variant: "error" }
@@ -184,6 +114,13 @@ const Login = () => {
             )
             .then((response) => {
                 // User exists
+                if (response.data.user.auth_type != "normal") {
+                    return enqueueSnackbar(
+                        "Invalid password change request for this account",
+                        { variant: "warning" }
+                    );
+                }
+
                 enqueueSnackbar("Sending OTP via Email", {
                     variant: "success",
                 });
@@ -202,7 +139,7 @@ const Login = () => {
                         });
                     })
                     .catch((otpErr) => {
-                        console.log("OTP Error in Login:", otpErr?.response);
+                        console.error("OTP Error in Login:", otpErr?.response);
                         return enqueueSnackbar(
                             otpErr?.response?.data?.message ??
                                 "Error occured while sending OTP",
@@ -211,7 +148,7 @@ const Login = () => {
                     });
             })
             .catch((err) => {
-                console.log(
+                console.error(
                     "Error in checking user existance in Login:",
                     err.response
                 );
@@ -261,7 +198,6 @@ const Login = () => {
                 password: forgotPasswordData.password,
             })
             .then((passwordResp) => {
-                console.log("Password change response:", passwordResp.data);
                 setShowLoginForm(true);
                 setShowResetPwdForm(false);
                 return enqueueSnackbar(
@@ -271,7 +207,10 @@ const Login = () => {
                 );
             })
             .catch((passwordErr) => {
-                console.log("Error in Password change in Login:", passwordErr);
+                console.error(
+                    "Error in Password change in Login:",
+                    passwordErr
+                );
             });
     };
 
@@ -296,21 +235,20 @@ const Login = () => {
                     alignContent: "center",
                 }}
             >
-
                 {/* Login Form */}
                 {showLoginForm && (
                     <form method="POST" onSubmit={handleRegularLogin}>
                         <Typography variant="h4" textAlign="center" my={2}>
-                            {t('login')}
+                            {t("login")}
                         </Typography>
 
                         <center>
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="email"
-                                    placeholder={t('emailAddress')}
+                                    placeholder={t("emailAddress")}
                                     type="email"
-                                    label={t('emailAddress')}
+                                    label={t("emailAddress")}
                                     value={formValues.email}
                                     onChange={handleInputChange}
                                     error={!!formErrors.email}
@@ -324,9 +262,9 @@ const Login = () => {
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="password"
-                                    placeholder={t('password')}
+                                    placeholder={t("password")}
                                     type="password"
-                                    label={t('password')}
+                                    label={t("password")}
                                     value={formValues.password}
                                     onChange={handleInputChange}
                                     error={!!formErrors.password}
@@ -345,7 +283,7 @@ const Login = () => {
                                             setShowLoginForm(false);
                                         }}
                                     >
-                                        {t('forgotPassword')}
+                                        {t("forgotPassword")}
                                     </Button>
                                     {/* <Link to="/">Forgot Password?</Link> */}
                                 </Typography>
@@ -362,7 +300,7 @@ const Login = () => {
                                     type="submit"
                                     disabled={hasErrors}
                                 >
-                                    {t('login')}
+                                    {t("login")}
                                 </Button>
                             </FormControl>
                         </center>
@@ -373,16 +311,16 @@ const Login = () => {
                 {showForgotForm && (
                     <form method="POST" onSubmit={handleSendOTP}>
                         <Typography variant="h4" textAlign="center" my={2}>
-                            Forgot Password
+                            {t("forgotPassword")}
                         </Typography>
 
                         <center>
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="email"
-                                    placeholder="Email address"
+                                    placeholder={t("emailAddress")}
                                     type="email"
-                                    label="Email address"
+                                    label={t("emailAddress")}
                                     value={forgotPasswordData?.email}
                                     onChange={handleForgotFormInputChange}
                                 />
@@ -397,7 +335,7 @@ const Login = () => {
                                     }}
                                     type="submit"
                                 >
-                                    Get OTP
+                                    {t("getOTP")}
                                 </Button>
                             </FormControl>
                         </center>
@@ -408,7 +346,7 @@ const Login = () => {
                 {showOTPForm && (
                     <form method="POST" onSubmit={handleVerifyOTP}>
                         <Typography variant="h4" textAlign="center" my={2}>
-                            Forgot Password
+                            {t("forgotPassword")}
                         </Typography>
 
                         <center>
@@ -432,7 +370,7 @@ const Login = () => {
                                     }}
                                     type="submit"
                                 >
-                                    Verify OTP
+                                    {t("verifyOTP")}
                                 </Button>
                             </FormControl>
                         </center>
@@ -443,15 +381,15 @@ const Login = () => {
                 {showResetPwdForm && (
                     <form method="POST" onSubmit={handlePasswordChange}>
                         <Typography variant="h4" textAlign="center" my={2}>
-                            Forgot Password
+                            {t("forgotPassword")}
                         </Typography>
                         <center>
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="password"
-                                    placeholder="New Password"
+                                    placeholder={t("newPassword")}
                                     type="password"
-                                    label="New Password"
+                                    label={t("newPassword")}
                                     value={forgotPasswordData.password}
                                     onChange={handleForgotFormInputChange}
                                 />
@@ -466,7 +404,7 @@ const Login = () => {
                                     }}
                                     type="submit"
                                 >
-                                    Change Password
+                                    {t("changePassword")}
                                 </Button>
                             </FormControl>
                         </center>
@@ -475,22 +413,11 @@ const Login = () => {
 
                 <center>
                     <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                        <GoogleLogin
-                            clientId={clientId}
-                            buttonText="Sign in with Google"
-                            onSuccess={onGoogleAuthSuccess}
-                            onFailure={onGoogleAuthFailure}
-                            cookiePolicy={"single_host_origin"}
-                        />
+                        <GoogleSignIn />
                     </FormControl>
 
                     <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                        <FacebookLogin
-                            appId={process.env.REACT_APP_FACEBOOK_ID}
-                            fields="name,email,picture"
-                            callback={onFacebookAuthSuccess}
-                            size="small"
-                        />
+                        <FacebookSignIn />
                     </FormControl>
 
                     <FormControl fullWidth sx={{ width: "80%" }}>

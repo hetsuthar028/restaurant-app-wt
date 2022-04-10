@@ -5,7 +5,7 @@ import PushPinRoundedIcon from "@mui/icons-material/PushPinRounded";
 import QueryBuilderTwoToneIcon from "@mui/icons-material/QueryBuilderTwoTone";
 import Footer from "../footer/Footer";
 import Navbar from "../navbar/NavBar";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const WelcomePage = () => {
     const { t } = useTranslation(["welcome", "common"]);
@@ -31,7 +31,7 @@ const WelcomePage = () => {
                     variant="h1"
                     textAlign="center"
                 >
-                    {t('common:taglinePart1')}
+                    {t("common:taglinePart1")}
                 </Typography>
                 <Typography
                     fontFamily="Bartender SmCond Serif Pressed"
@@ -39,7 +39,7 @@ const WelcomePage = () => {
                     variant="h6"
                     textAlign="center"
                 >
-                    {t('common:taglinePart2')}
+                    {t("common:taglinePart2")}
                 </Typography>
                 <Typography
                     fontFamily="Bartender SmCond Serif Pressed"
@@ -47,7 +47,7 @@ const WelcomePage = () => {
                     variant="h1"
                     textAlign="center"
                 >
-                    {t('common:taglinePart3')}
+                    {t("common:taglinePart3")}
                 </Typography>
 
                 <Grid container my={2}>
@@ -60,10 +60,14 @@ const WelcomePage = () => {
                             sx={{ color: "#ccc" }}
                             variant="h6"
                         >
-                            {t('welcome:addressPart1')}<br />
-                            {t('welcome:addressPart2')}<br />
-                            {t('welcome:addressPart3')}<br />
-                            {t('welcome:addressPart4')}<br />
+                            {t("welcome:addressPart1")}
+                            <br />
+                            {t("welcome:addressPart2")}
+                            <br />
+                            {t("welcome:addressPart3")}
+                            <br />
+                            {t("welcome:addressPart4")}
+                            <br />
                         </Typography>
                     </Grid>
                 </Grid>
@@ -82,7 +86,7 @@ const WelcomePage = () => {
                             12PM-10PM
                             <br />
                             <span style={{ color: "#DD7230" }}>
-                                {t('welcome:sunday')}:
+                                {t("welcome:sunday")}:
                             </span>{" "}
                             10AM-11:30PM
                             <br />

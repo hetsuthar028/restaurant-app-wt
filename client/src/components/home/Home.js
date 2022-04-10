@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
     Grid,
     Typography,
-    Divider,
     FormControl,
     Select,
     InputLabel,
@@ -14,7 +13,6 @@ import {
     DialogContentText,
     DialogActions,
 } from "@mui/material";
-import ItemCard from "../menu-item/ItemCard";
 import TextInput from "../shared/TextInput";
 import axios from "axios";
 import CategorySection from "./CategorySection";
@@ -23,24 +21,25 @@ import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../navbar/NavBar";
 import Footer from "../footer/Footer";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles((theme) => ({
     selectDark: {
-        '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#DD7230',
-            color: 'white'
-          },
-          '& .MuiOutlinedInput-input': {
-              color: 'white'
-          },
+        "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#DD7230",
+            color: "white",
+        },
+        "& .MuiOutlinedInput-input": {
+            color: "white",
+        },
     },
     textDark: {
-        '& .MuiOutlinedInput-root, .MuiInputBase-sizeSmall, MuiInputBase-colorPrimary': {
-            border: '1px solid red'
-        }
-    }
-}))
+        "& .MuiOutlinedInput-root, .MuiInputBase-sizeSmall, MuiInputBase-colorPrimary":
+            {
+                border: "1px solid red",
+            },
+    },
+}));
 
 const Home = () => {
     const classes = useStyles();
@@ -62,22 +61,26 @@ const Home = () => {
                     ...filters,
                 },
                 headers: {
-                    authorization: window.localStorage.getItem('bearer'),
-                }
+                    authorization: window.localStorage.getItem("bearer"),
+                },
             })
             .then((response) => {
                 setAllItems(response.data.menuItems);
             })
             .catch((err) => {
-                if(err.response.status === 401){
-                    enqueueSnackbar('Please login to view home page!', { variant: 'warning' });
-                    return navigate('/login');
+                if (err.response.status === 401) {
+                    enqueueSnackbar("Please login to view home page!", {
+                        variant: "warning",
+                    });
+                    return navigate("/login");
                 }
-                if(err.response.status === 440){
-                    enqueueSnackbar(err.response?.data?.message, { variant: 'warning' });
-                    return navigate('/login');
+                if (err.response.status === 440) {
+                    enqueueSnackbar(err.response?.data?.message, {
+                        variant: "warning",
+                    });
+                    return navigate("/login");
                 }
-                console.log(
+                console.error(
                     "Error in fetching all items:",
                     err?.response?.data,
                     err.response
@@ -92,7 +95,7 @@ const Home = () => {
                 setAllCategories(response.data.categories);
             })
             .catch((err) => {
-                console.log(
+                console.error(
                     "Error in fetching all categories:",
                     err?.response?.data
                 );
@@ -112,7 +115,7 @@ const Home = () => {
             setIsAdmin(response.data.user.is_admin);
             return;
         } catch (error) {
-            console.log("Error fetching current user in home:", error);
+            console.error("Error fetching current user in home:", error);
             enqueueSnackbar("Please login to view home page!", {
                 variant: "error",
             });
@@ -150,11 +153,10 @@ const Home = () => {
         axios
             .delete(`http://localhost:5001/menu/delete/${toDeleteItem}`, {
                 headers: {
-                    authorization: window.localStorage.getItem('bearer')
-                }
+                    authorization: window.localStorage.getItem("bearer"),
+                },
             })
             .then((deleteResp) => {
-                console.log("Delete response:", deleteResp);
                 handleCloseDeleteDialog();
                 fetchAllItems();
                 if (deleteResp.data.deleteResp.modifiedCount === 1) {
@@ -169,13 +171,17 @@ const Home = () => {
                 }
             })
             .catch((deleteErr) => {
-                console.log("Error in delete:", deleteErr?.response);
-                if(deleteErr.response.status === 401){
-                    enqueueSnackbar('Login is required', { variant: 'warning' });
-                    return navigate('/login');
+                console.error("Error in delete:", deleteErr?.response);
+                if (deleteErr.response.status === 401) {
+                    enqueueSnackbar("Login is required", {
+                        variant: "warning",
+                    });
+                    return navigate("/login");
                 }
-                if(deleteErr.response.status === 403){
-                    return enqueueSnackbar('Unauthorized request', { variant: 'warning' });
+                if (deleteErr.response.status === 403) {
+                    return enqueueSnackbar("Unauthorized request", {
+                        variant: "warning",
+                    });
                 }
                 handleCloseDeleteDialog();
                 return enqueueSnackbar(
@@ -190,130 +196,164 @@ const Home = () => {
     }, [filters]);
 
     return (
-        <Grid 
+        <Grid
             container
             sx={{
                 background: `url(https://images.unsplash.com/photo-1554050857-c84a8abdb5e2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=327&q=80)`,
             }}
         >
             <Navbar />
+
+            {/* Filter, Sorting Options */}
             <Grid container>
                 <Grid item xs={12} md={6} sm={6} sx={{ p: 2 }}>
-                    <form method='POST'>
-                    <FormControl fullWidth sx={{ mx: 1, width: "80%" }}>
-                        <TextInput
-                            placeholder={t('home:searchFoodItems')}
-                            label={t('home:searchFoodItems')}
-                            name="query"
-                            size="small"
-                            value={filters.query}
-                            onChange={handleFilterChange}
-                            className={classes.textDark}
-                            mode='dark'
-                        />
-                    </FormControl>
+                    <form method="POST">
+                        <FormControl fullWidth sx={{ mx: 1, width: "80%" }}>
+                            <TextInput
+                                placeholder={t("home:searchFoodItems")}
+                                label={t("home:searchFoodItems")}
+                                name="query"
+                                size="small"
+                                value={filters.query}
+                                onChange={handleFilterChange}
+                                className={classes.textDark}
+                                mode="dark"
+                            />
+                        </FormControl>
                     </form>
                 </Grid>
                 <Grid item xs={12} md={6} sm={6} textAlign="end" sx={{ p: 2 }}>
                     <FormControl sx={{ minWidth: 120, mx: 1 }}>
-                        <InputLabel id="demo-simple-select-label" sx={{
-                            color: 'white'
-                        }}>
-                            {t('home:Price')}
+                        <InputLabel
+                            id="demo-simple-select-label"
+                            sx={{
+                                color: "white",
+                            }}
+                        >
+                            {t("home:Price")}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={availability}
-                            label={t('home:Price')}
+                            label={t("home:Price")}
                             name="price"
                             size="small"
                             onChange={handleFilterChange}
                             className={classes.selectDark}
                         >
                             <MenuItem value={0}>-</MenuItem>
-                            <MenuItem value={1}>{t('home:lowToHigh')}</MenuItem>
-                            <MenuItem value={-1}>{t('home:highToLow')}</MenuItem>
+                            <MenuItem value={1}>{t("home:lowToHigh")}</MenuItem>
+                            <MenuItem value={-1}>
+                                {t("home:highToLow")}
+                            </MenuItem>
                         </Select>
                     </FormControl>
-                    <FormControl sx={{ minWidth: 120, mx: 1, }}>
-                        <InputLabel id="demo-simple-select-label" sx={{
-                            color: 'white'
-                        }}>
-                            {t('home:availability')}
+                    <FormControl sx={{ minWidth: 120, mx: 1 }}>
+                        <InputLabel
+                            id="demo-simple-select-label"
+                            sx={{
+                                color: "white",
+                            }}
+                        >
+                            {t("home:availability")}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={availability}
-                            label={t('home:availability')}
+                            label={t("home:availability")}
                             size="small"
                             name="available"
                             onChange={handleFilterChange}
                             className={classes.selectDark}
                         >
-                            <MenuItem value={"all"}>{t('home:all')}</MenuItem>
-                            <MenuItem value={true}>{t('home:available')}</MenuItem>
-                            <MenuItem value={false}>{t('home:notAvailable')}</MenuItem>
+                            <MenuItem value={"all"}>{t("home:all")}</MenuItem>
+                            <MenuItem value={true}>
+                                {t("home:available")}
+                            </MenuItem>
+                            <MenuItem value={false}>
+                                {t("home:notAvailable")}
+                            </MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl sx={{ minWidth: 120, mx: 1 }}>
-                        <InputLabel id="demo-simple-select-label" sx={{
-                            color: 'white'
-                        }}>
-                            {t('home:course')}
+                        <InputLabel
+                            id="demo-simple-select-label"
+                            sx={{
+                                color: "white",
+                            }}
+                        >
+                            {t("home:course")}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
-                            label={t('home:course')}
+                            label={t("home:course")}
                             name="category"
                             size="small"
                             onChange={handleFilterChange}
                             className={classes.selectDark}
                         >
-                            <MenuItem value={"all"}>{t('home:all')}</MenuItem>
+                            <MenuItem value={"all"}>{t("home:all")}</MenuItem>
                             {allCategories.map((category) => (
                                 <MenuItem
                                     value={category._id}
                                     key={category._id}
                                 >
-                                    {t(`home:${category.name.toString().toLowerCase()}`)}
+                                    {t(
+                                        `home:${category.name
+                                            .toString()
+                                            .toLowerCase()}`
+                                    )}
                                 </MenuItem>
                             ))}
                         </Select>
                     </FormControl>
                     <FormControl sx={{ minWidth: 120, mx: 1 }}>
-                        <InputLabel id="demo-simple-select-label" sx={{
-                            color: 'white'
-                        }}>
-                            {t('home:vegOrNonVeg')}
+                        <InputLabel
+                            id="demo-simple-select-label"
+                            sx={{
+                                color: "white",
+                            }}
+                        >
+                            {t("home:vegOrNonVeg")}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
-                            label={t('home:vegOrNonVeg')}
+                            label={t("home:vegOrNonVeg")}
                             size="small"
                             name="is_veg"
                             onChange={handleFilterChange}
                             className={classes.selectDark}
                         >
-                            <MenuItem value={"all"}>{t('home:all')}</MenuItem>
-                            <MenuItem value={true}>{t('home:veg')}</MenuItem>
-                            <MenuItem value={false}>{t('home:nonVeg')}</MenuItem>
+                            <MenuItem value={"all"}>{t("home:all")}</MenuItem>
+                            <MenuItem value={true}>{t("home:veg")}</MenuItem>
+                            <MenuItem value={false}>
+                                {t("home:nonVeg")}
+                            </MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
             </Grid>
+
+            {/* Fallback message */}
             <Grid item xs={12} sm={12} md={12} my={2}>
                 {allItems.length === 0 && (
                     <center>
-                        <Typography fontFamily="Bartender SmCond Serif Pressed" variant="h3" sx={{color: '#ccc'}}>
-                            {t('home:noMenuFoundMessage')}
+                        <Typography
+                            fontFamily="Bartender SmCond Serif Pressed"
+                            variant="h3"
+                            sx={{ color: "#ccc" }}
+                        >
+                            {t("home:noMenuFoundMessage")}
                         </Typography>
                     </center>
                 )}
             </Grid>
+
+            {/* Categories Section */}
             {allCategories.map((category) => (
                 <CategorySection
                     items={allItems.filter(
@@ -338,15 +378,15 @@ const Home = () => {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        {t('home:deleteWarning')}
+                        {t("home:deleteWarning")}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>
-                        {t('common:cancel')}
+                        {t("common:cancel")}
                     </Button>
                     <Button onClick={() => handleItemDelete()} autoFocus>
-                        {t('common:delete')}
+                        {t("common:delete")}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -8,5 +8,9 @@
     "dontHaveAnAccount": "Vous n'avez pas de compte ? Inscrivez-vous ici",
     "forgotPassword": "Mot de passe oublié?",
     "signInWithGoogle": "Connectez-vous avec Google",
-    "login": "Connexion"
+    "login": "Connexion",
+    "getOTP": "Obtenir OTP",
+    "verifyOTP": "Vérifier OTP",
+    "newPassword": "nouveau mot de passe",
+    "changePassword": "Changer le mot de passe"
 }
