@@ -24,8 +24,8 @@ import { useSnackbar } from "notistack";
 import "./MenuForm.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../navbar/NavBar";
-import HelperText from '../shared/HelperText';
-import { useTranslation } from 'react-i18next';
+import HelperText from "../shared/HelperText";
+import { useTranslation } from "react-i18next";
 
 const initialFormValues = {
     name: "",
@@ -54,7 +54,6 @@ const MenuForm = () => {
     const [ingredientFormErrors, setIngredientFormErrors] = useState({});
     const [hasErrors, setHasErrors] = useState(true);
 
-    const [tempImage, setTempImage] = useState([]);
     const [showIngredientsForm, setShowIngredientsForm] = useState(false);
     const [categoryList, setCategoryList] = useState([]);
 
@@ -87,14 +86,13 @@ const MenuForm = () => {
                     },
                 }
             );
-            console.log("Response in Menu Form", response.data);
             if (!response.data.user.is_admin) {
                 enqueueSnackbar("Unauthorized access", { variant: "warning" });
                 return navigate("/home");
             }
             return;
         } catch (error) {
-            console.log("Error fetching current user in home:", error);
+            console.error("Error fetching current user in home:", error);
             enqueueSnackbar("Please login to view home page!", {
                 variant: "error",
             });
@@ -119,20 +117,22 @@ const MenuForm = () => {
         setIngredientList(menuItem.ingredients ?? {});
     }, []);
 
-
     const validateInputs = (name, value) => {
-        if((name === 'name' || name === 'description') && value.length < 3){
+        if ((name === "name" || name === "description") && value.length < 3) {
             return `Invalid ${name}`;
         }
 
-        if((name === 'price' || name === 'preparationTime') && (!(/[0-9]/i.test(value)) || parseFloat(value) < 0)){
-            return `Invalid ${name}`;
-        }     
-        
-        if(name === 'value' && value.length === 0){
+        if (
+            (name === "price" || name === "preparationTime") &&
+            (!/[0-9]/i.test(value) || parseFloat(value) < 0)
+        ) {
             return `Invalid ${name}`;
         }
-    }
+
+        if (name === "value" && value.length === 0) {
+            return `Invalid ${name}`;
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -145,7 +145,7 @@ const MenuForm = () => {
         setFormErrors({
             ...formErrors,
             [name]: validateInputs(name, value),
-        })
+        });
     };
 
     const handleCheckboxChange = (e) => {
@@ -193,7 +193,7 @@ const MenuForm = () => {
         setIngredientFormErrors({
             ...ingredientFormErrors,
             [name]: validateInputs(name, value),
-        })
+        });
     };
 
     const handleAddIngredient = (e) => {
@@ -225,7 +225,6 @@ const MenuForm = () => {
 
     const handleUploadChange = (e) => {
         let { name, value, files } = e.target;
-        console.log(files);
 
         const imagesFormData = new FormData();
         Object.keys(files).map((key) => {
@@ -236,11 +235,10 @@ const MenuForm = () => {
             .post(`http://localhost:5001/upload/cache`, imagesFormData, {
                 headers: {
                     "Content-type": "multipart/form-data",
-                    authorization: window.localStorage.getItem('bearer')
+                    authorization: window.localStorage.getItem("bearer"),
                 },
             })
             .then((response) => {
-                console.log("Response from cache upload", response.data);
                 let tempList = {};
                 let someArr = [];
 
@@ -252,10 +250,6 @@ const MenuForm = () => {
                         filename: files[key].name,
                         cacheFile: response.data.filesNames[idx],
                     };
-                    // setUploadedImages({
-                    //     ...uploadedImages,
-                    //     [files[key].name]: response.data.filesNames[idx]
-                    // })
                     someArr.push(tempList2);
                     if (
                         Object.keys(tempList).length ===
@@ -271,44 +265,44 @@ const MenuForm = () => {
                 });
             })
             .catch((error) => {
-                console.log("Error from cache upload:", error?.response);
-                if(error.response.status === 401){
-                    enqueueSnackbar('Login is required', { variant: 'warning' });
-                    return navigate('/login');
+                console.error("Error from cache upload:", error?.response);
+                if (error.response.status === 401) {
+                    enqueueSnackbar("Login is required", {
+                        variant: "warning",
+                    });
+                    return navigate("/login");
                 }
-                if(error.response.status === 403){
-                    enqueueSnackbar('Unauthorized request', { variant: 'warning' });
-                    return navigate('/home');
+                if (error.response.status === 403) {
+                    enqueueSnackbar("Unauthorized request", {
+                        variant: "warning",
+                    });
+                    return navigate("/home");
                 }
             });
-
-        setTempImage([...files]);
     };
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
 
-        console.log({
-            ...formValues,
-            ingredients: ingredientList,
-            recipe: recipeList,
-        });
-
         if (editMode) {
             axios
-                .put(`http://localhost:5001/menu/edit/${formValues._id}`, {
-                    ...formValues,
-                    ingredients: ingredientList,
-                    recipe: recipeList,
-                    images: allImages.map((file) => file.cacheFile),
-                    existingImages: [...formValues.images],
-                }, {
-                    headers: {
-                        authorization: window.localStorage.getItem('bearer')
+                .put(
+                    `http://localhost:5001/menu/edit/${formValues._id}`,
+                    {
+                        ...formValues,
+                        ingredients: ingredientList,
+                        recipe: recipeList,
+                        images: allImages.map((file) => file.cacheFile),
+                        existingImages: [...formValues.images],
+                    },
+                    {
+                        headers: {
+                            authorization:
+                                window.localStorage.getItem("bearer"),
+                        },
                     }
-                })
+                )
                 .then((editResp) => {
-                    console.log("Edit Response", editResp.data);
                     enqueueSnackbar("Menu item edited successfully!", {
                         variant: "success",
                     });
@@ -316,13 +310,17 @@ const MenuForm = () => {
                 })
                 .catch((editErr) => {
                     console.error("Error in Edit:", editErr?.response?.data);
-                    if(editErr.response.status === 401){
-                        enqueueSnackbar('Login is required', { variant: 'warning'});
-                        return navigate('/login');
+                    if (editErr.response.status === 401) {
+                        enqueueSnackbar("Login is required", {
+                            variant: "warning",
+                        });
+                        return navigate("/login");
                     }
-                    if(editErr.response.status === 403){
-                        enqueueSnackbar('Unauthorized request', { variant: 'warning' });
-                        return navigate('/home');
+                    if (editErr.response.status === 403) {
+                        enqueueSnackbar("Unauthorized request", {
+                            variant: "warning",
+                        });
+                        return navigate("/home");
                     }
                     return enqueueSnackbar(
                         editErr?.response?.data?.message ??
@@ -332,18 +330,22 @@ const MenuForm = () => {
                 });
         } else {
             axios
-                .post(`http://localhost:5001/menu/add`, {
-                    ...formValues,
-                    ingredients: ingredientList,
-                    recipe: recipeList,
-                    images: allImages.map((file) => file.cacheFile),
-                }, {
-                    headers: {
-                        authorization: window.localStorage.getItem('bearer'),
+                .post(
+                    `http://localhost:5001/menu/add`,
+                    {
+                        ...formValues,
+                        ingredients: ingredientList,
+                        recipe: recipeList,
+                        images: allImages.map((file) => file.cacheFile),
+                    },
+                    {
+                        headers: {
+                            authorization:
+                                window.localStorage.getItem("bearer"),
+                        },
                     }
-                })
+                )
                 .then((response) => {
-                    console.log("Add menu item response:", response.data);
                     enqueueSnackbar("Menu item added successfully!", {
                         variant: "success",
                     });
@@ -354,13 +356,17 @@ const MenuForm = () => {
                         "Error in adding menu item:",
                         err?.response?.data
                     );
-                    if(err.response.status === 401){
-                        enqueueSnackbar('Login is required', { variant: 'warning' });
-                        return navigate('/login');
+                    if (err.response.status === 401) {
+                        enqueueSnackbar("Login is required", {
+                            variant: "warning",
+                        });
+                        return navigate("/login");
                     }
-                    if(err.response.status === 403){
-                        enqueueSnackbar('Unauthorized request', { variant: 'warning' });
-                        return navigate('/home');
+                    if (err.response.status === 403) {
+                        enqueueSnackbar("Unauthorized request", {
+                            variant: "warning",
+                        });
+                        return navigate("/home");
                     }
                     return enqueueSnackbar(
                         err?.response?.data?.message ??
@@ -395,382 +401,467 @@ const MenuForm = () => {
                     fontFamily="Bebas Neue"
                     textAlign="center"
                 >
-                    {editMode ? t('item:formTitleEdit') : t('item:formTitleAdd')}
+                    {editMode
+                        ? t("item:formTitleEdit")
+                        : t("item:formTitleAdd")}
                 </Typography>
                 <Divider sx={{ my: 1 }}>
-                    <Chip label={t('item:formSubtitle')} />
+                    <Chip label={t("item:formSubtitle")} />
                 </Divider>
             </Grid>
             <Grid item xs={12} sm={12} md={12}>
-            <form method="POST" onSubmit={handleFormSubmit}>
-                {/* Main Form */}
-                <Grid container>
-                    <Grid item xs={2} md={2} sm={2}></Grid>
-                    <Grid item xs={8} md={8} sm={8} my={2} sx={{ px: 2 }}>
-                        <FormControl fullWidth sx={{ my: 1 }}>
-                            <TextInput
-                                placeholder={t('item:itemName')}
-                                label={t('item:itemName')}
-                                name="name"
-                                value={formValues.name}
-                                onChange={handleInputChange}
-                                error={!!formErrors.name}
-                            />
-                            <HelperText
-                                text={formErrors?.name}
-                            />
-                        </FormControl>
-                        <FormControl fullWidth sx={{ my: 1 }}>
-                            <TextInput
-                                placeholder={t('item:description')}
-                                label={t('item:description')}
-                                name="description"
-                                value={formValues.description}
-                                onChange={handleInputChange}
-                                error={!!formErrors.description}
-                            />
-                            <HelperText
-                                text={formErrors?.description}
-                            />
-                        </FormControl>
-                        <FormControl sx={{ minWidth: 200, my: 1 }}>
-                            <InputLabel id="demo-simple-select-label">
-                                {t('item:courseType')}
-                            </InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                label={t('item:courseType')}
-                                defaultValue={""}
-                                required
-                                name="category"
-                                value={formValues.category ?? ""}
-                                onChange={handleInputChange}
-                            >
-                                {categoryList.map((category) => (
-                                    <MenuItem
-                                        key={category._id}
-                                        value={category._id}
-                                    >
-                                        {t(`home:${category.name.toString().toLowerCase()}`)}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <FormControl fullWidth sx={{ my: 1 }}>
-                            <TextInput
-                                placeholder={t('item:price')}
-                                label={t('item:price')}
-                                name="price"
-                                type="number"
-                                value={formValues.price}
-                                onChange={handleInputChange}
-                                error={!!formErrors.price}
-                            />
-                            <HelperText
-                                text={formErrors?.price}
-                            />
-                        </FormControl>
-                        <FormControl fullWidth sx={{ my: 1 }}>
-                            <TextInput
-                                placeholder={t('item:preparationTime')}
-                                label={t('item:preparationTime')}
-                                name="preparationTime"
-                                type="number"
-                                value={formValues.preparationTime}
-                                onChange={handleInputChange}
-                                error={!!formErrors.preparationTime}
-                            />
-                            <HelperText
-                                text={formErrors?.preparationTime}
-                            />
-                        </FormControl>
-
-                        <Divider sx={{ my: 1 }} />
-
-                        {/* Food Types Section */}
-                        <FormGroup>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox checked={formValues.available} />
-                                }
-                                name="available"
-                                label={t("home:available")}
-                                onChange={handleCheckboxChange}
-                            />
-                        </FormGroup>
-                        <FormControl>
-                            <RadioGroup
-                                row
-                                aria-labelledby="demo-row-radio-buttons-group-label"
-                                name="row-radio-buttons-group"
-                                value={formValues.is_veg}
-                                onChange={handleRadioChange}
-                            >
-                                <FormControlLabel
-                                    value={true}
-                                    control={<Radio />}
-                                    label={t('home:veg')}
-                                    name="is_veg"
+                <form method="POST" onSubmit={handleFormSubmit}>
+                    {/* Main Form */}
+                    <Grid container>
+                        <Grid item xs={2} md={2} sm={2}></Grid>
+                        <Grid item xs={8} md={8} sm={8} my={2} sx={{ px: 2 }}>
+                            <FormControl fullWidth sx={{ my: 1 }}>
+                                <TextInput
+                                    placeholder={t("item:itemName")}
+                                    label={t("item:itemName")}
+                                    name="name"
+                                    value={formValues.name}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.name}
                                 />
-                                <FormControlLabel
-                                    value={false}
-                                    control={<Radio />}
-                                    label={t('home:nonVeg')}
-                                    name="is_veg"
+                                <HelperText text={formErrors?.name} />
+                            </FormControl>
+                            <FormControl fullWidth sx={{ my: 1 }}>
+                                <TextInput
+                                    placeholder={t("item:description")}
+                                    label={t("item:description")}
+                                    name="description"
+                                    value={formValues.description}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.description}
                                 />
-                            </RadioGroup>
-                        </FormControl>
-                        <FormGroup>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox checked={formValues.is_jain} />
-                                }
-                                label="Jain"
-                                name="is_jain"
-                                onChange={handleCheckboxChange}
-                            />
-                        </FormGroup>
-                        <Divider sx={{ my: 1 }} />
-
-                        {/* Ingredients section */}
-                        <Grid container my={2}>
-                            <Grid item xs={4} sm={6} md={2} textAlign="start">
-                                <Typography variant="h6">
-                                    {t('item:ingredient', {count: 2})}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={8} sm={6} md={10}>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() =>
-                                        setShowIngredientsForm(
-                                            (value) => !value
-                                        )
-                                    }
+                                <HelperText text={formErrors?.description} />
+                            </FormControl>
+                            <FormControl sx={{ minWidth: 200, my: 1 }}>
+                                <InputLabel id="demo-simple-select-label">
+                                    {t("item:courseType")}
+                                </InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    label={t("item:courseType")}
+                                    defaultValue={""}
+                                    required
+                                    name="category"
+                                    value={formValues.category ?? ""}
+                                    onChange={handleInputChange}
                                 >
-                                    {/* ➕ */}
-                                    {t('item:addAnIngredient')}
-                                </Button>
-                            </Grid>
-                        </Grid>
+                                    {categoryList.map((category) => (
+                                        <MenuItem
+                                            key={category._id}
+                                            value={category._id}
+                                        >
+                                            {t(
+                                                `home:${category.name
+                                                    .toString()
+                                                    .toLowerCase()}`
+                                            )}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth sx={{ my: 1 }}>
+                                <TextInput
+                                    placeholder={t("item:price")}
+                                    label={t("item:price")}
+                                    name="price"
+                                    type="number"
+                                    value={formValues.price}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.price}
+                                />
+                                <HelperText text={formErrors?.price} />
+                            </FormControl>
+                            <FormControl fullWidth sx={{ my: 1 }}>
+                                <TextInput
+                                    placeholder={t("item:preparationTime")}
+                                    label={t("item:preparationTime")}
+                                    name="preparationTime"
+                                    type="number"
+                                    value={formValues.preparationTime}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.preparationTime}
+                                />
+                                <HelperText
+                                    text={formErrors?.preparationTime}
+                                />
+                            </FormControl>
 
-                        {showIngredientsForm && (
-                            <Card sx={{ p: 2 }} elevation={2}>
-                                <Grid container>
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        md={12}
-                                        sm={12}
-                                        textAlign="center"
-                                    >
-                                        <Typography variant="body1">
-                                            {t('item:ingredient', {count: 1})}
-                                        </Typography>
-                                        <FormControl sx={{ mx: 1 }}>
-                                            <TextInput
-                                                size="small"
-                                                placeholder={`${t('item:ingredient', {count: 1})} ${t('item:name')}`}
-                                                label={`${t('item:ingredient', {count: 1})} ${t('item:name')}`}
-                                                name="name"
-                                                onChange={
-                                                    handleIngredientInputChange
-                                                }
-                                                value={ingredientForm.name}
-                                            />
-                                            <HelperText
-                                                text={ingredientFormErrors?.name}
-                                            />
-                                        </FormControl>
-                                        <FormControl sx={{ mx: 1 }}>
-                                            <TextInput
-                                                size="small"
-                                                placeholder={`${t('item:amount')} / ${t('item:quantity')}`}
-                                                label={`${t('item:amount')} / ${t('item:quantity')}`}
-                                                name="value"
-                                                value={ingredientForm.value}
-                                                onChange={
-                                                    handleIngredientInputChange
-                                                }
-                                            />
-                                            <HelperText
-                                                text={ingredientFormErrors?.value}
-                                            />
-                                        </FormControl>
-                                        <br />
-                                        <FormControl sx={{ display: "inline" }}>
-                                            <Button
-                                                variant="contained"
-                                                sx={{ m: 1 }}
-                                                onClick={handleAddIngredient}
-                                            >
-                                                {t('common:add')}
-                                            </Button>
-                                            <Button
-                                                variant="contained"
-                                                sx={{ m: 1 }}
-                                                onClick={() =>
-                                                    setShowIngredientsForm(
-                                                        false
-                                                    )
-                                                }
-                                            >
-                                                {t('common:cancel')}
-                                            </Button>
-                                        </FormControl>
-                                    </Grid>
+                            <Divider sx={{ my: 1 }} />
+
+                            {/* Food Types Section */}
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={formValues.available}
+                                        />
+                                    }
+                                    name="available"
+                                    label={t("home:available")}
+                                    onChange={handleCheckboxChange}
+                                />
+                            </FormGroup>
+                            <FormControl>
+                                <RadioGroup
+                                    row
+                                    aria-labelledby="demo-row-radio-buttons-group-label"
+                                    name="row-radio-buttons-group"
+                                    value={formValues.is_veg}
+                                    onChange={handleRadioChange}
+                                >
+                                    <FormControlLabel
+                                        value={true}
+                                        control={<Radio />}
+                                        label={t("home:veg")}
+                                        name="is_veg"
+                                    />
+                                    <FormControlLabel
+                                        value={false}
+                                        control={<Radio />}
+                                        label={t("home:nonVeg")}
+                                        name="is_veg"
+                                    />
+                                </RadioGroup>
+                            </FormControl>
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={formValues.is_jain}
+                                        />
+                                    }
+                                    label="Jain"
+                                    name="is_jain"
+                                    onChange={handleCheckboxChange}
+                                />
+                            </FormGroup>
+                            <Divider sx={{ my: 1 }} />
+
+                            {/* Ingredients section */}
+                            <Grid container my={2}>
+                                <Grid
+                                    item
+                                    xs={4}
+                                    sm={6}
+                                    md={2}
+                                    textAlign="start"
+                                >
+                                    <Typography variant="h6">
+                                        {t("item:ingredient", { count: 2 })}
+                                    </Typography>
                                 </Grid>
-                            </Card>
-                        )}
-
-                        {/* Ingredients list */}
-                        <Grid container>
-                            {Object.keys(ingredientList).map(
-                                (ingredient, idx) => (
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        sm={12}
-                                        md={4}
-                                        key={ingredient}
+                                <Grid item xs={8} sm={6} md={10}>
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() =>
+                                            setShowIngredientsForm(
+                                                (value) => !value
+                                            )
+                                        }
                                     >
-                                        <Card elevation={2} sx={{ p: 1, m: 1 }}>
-                                            <Typography
-                                                sx={{ display: "inline" }}
-                                            >
-                                                {ingredient} -{" "}
-                                                {ingredientList[ingredient]}
+                                        {/* ➕ */}
+                                        {t("item:addAnIngredient")}
+                                    </Button>
+                                </Grid>
+                            </Grid>
+
+                            {showIngredientsForm && (
+                                <Card sx={{ p: 2 }} elevation={2}>
+                                    <Grid container>
+                                        <Grid
+                                            item
+                                            xs={12}
+                                            md={12}
+                                            sm={12}
+                                            textAlign="center"
+                                        >
+                                            <Typography variant="body1">
+                                                {t("item:ingredient", {
+                                                    count: 1,
+                                                })}
                                             </Typography>
-                                            <Box
-                                                component="div"
+                                            <FormControl sx={{ mx: 1 }}>
+                                                <TextInput
+                                                    size="small"
+                                                    placeholder={`${t(
+                                                        "item:ingredient",
+                                                        { count: 1 }
+                                                    )} ${t("item:name")}`}
+                                                    label={`${t(
+                                                        "item:ingredient",
+                                                        { count: 1 }
+                                                    )} ${t("item:name")}`}
+                                                    name="name"
+                                                    onChange={
+                                                        handleIngredientInputChange
+                                                    }
+                                                    value={ingredientForm.name}
+                                                />
+                                                <HelperText
+                                                    text={
+                                                        ingredientFormErrors?.name
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormControl sx={{ mx: 1 }}>
+                                                <TextInput
+                                                    size="small"
+                                                    placeholder={`${t(
+                                                        "item:amount"
+                                                    )} / ${t("item:quantity")}`}
+                                                    label={`${t(
+                                                        "item:amount"
+                                                    )} / ${t("item:quantity")}`}
+                                                    name="value"
+                                                    value={ingredientForm.value}
+                                                    onChange={
+                                                        handleIngredientInputChange
+                                                    }
+                                                />
+                                                <HelperText
+                                                    text={
+                                                        ingredientFormErrors?.value
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <br />
+                                            <FormControl
                                                 sx={{ display: "inline" }}
-                                                textAlign="end"
                                             >
                                                 <Button
+                                                    variant="contained"
+                                                    sx={{ m: 1 }}
+                                                    onClick={
+                                                        handleAddIngredient
+                                                    }
+                                                >
+                                                    {t("common:add")}
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    sx={{ m: 1 }}
                                                     onClick={() =>
-                                                        handleIngredientEdit(
-                                                            ingredient
+                                                        setShowIngredientsForm(
+                                                            false
                                                         )
                                                     }
                                                 >
-                                                    ✏️
+                                                    {t("common:cancel")}
+                                                </Button>
+                                            </FormControl>
+                                        </Grid>
+                                    </Grid>
+                                </Card>
+                            )}
+
+                            {/* Ingredients list */}
+                            <Grid container>
+                                {Object.keys(ingredientList).map(
+                                    (ingredient, idx) => (
+                                        <Grid
+                                            item
+                                            xs={12}
+                                            sm={12}
+                                            md={4}
+                                            key={ingredient}
+                                        >
+                                            <Card
+                                                elevation={2}
+                                                sx={{ p: 1, m: 1 }}
+                                            >
+                                                <Typography
+                                                    sx={{ display: "inline" }}
+                                                >
+                                                    {ingredient} -{" "}
+                                                    {ingredientList[ingredient]}
+                                                </Typography>
+                                                <Box
+                                                    component="div"
+                                                    sx={{ display: "inline" }}
+                                                    textAlign="end"
+                                                >
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleIngredientEdit(
+                                                                ingredient
+                                                            )
+                                                        }
+                                                    >
+                                                        ✏️
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleIngredientDelete(
+                                                                ingredient
+                                                            )
+                                                        }
+                                                    >
+                                                        ❌
+                                                    </Button>
+                                                </Box>
+                                            </Card>
+                                        </Grid>
+                                    )
+                                )}
+                            </Grid>
+
+                            <Divider sx={{ my: 1 }} />
+
+                            {/* Recipe section */}
+                            <Typography variant="h6">
+                                {t("item:recipe")}
+                            </Typography>
+
+                            <Grid container my={2}>
+                                {[...Array(recipeListCount).keys()].map(
+                                    (count) => (
+                                        <React.Fragment key={count}>
+                                            <Grid
+                                                item
+                                                xs={2}
+                                                md={2}
+                                                sm={2}
+                                                sx={{ my: 1 }}
+                                            >
+                                                <Button variant="contained">
+                                                    {t("item:step")} -{" "}
+                                                    {count + 1}
+                                                </Button>
+                                            </Grid>
+                                            <Grid
+                                                item
+                                                xs={2}
+                                                sm={1}
+                                                md={1}
+                                                textAlign="start"
+                                                sx={{ my: 1 }}
+                                            >
+                                                <Button
+                                                    onClick={() =>
+                                                        setRecipeListCount(
+                                                            (count) => count + 1
+                                                        )
+                                                    }
+                                                >
+                                                    ➕
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
-                                                        handleIngredientDelete(
-                                                            ingredient
+                                                        handleRecipeRemove(
+                                                            count
+                                                        )
+                                                    }
+                                                >
+                                                    ➖
+                                                </Button>
+                                            </Grid>
+                                            <Grid
+                                                item
+                                                xs={8}
+                                                sm={9}
+                                                md={9}
+                                                textAlign="start"
+                                            >
+                                                <FormControl
+                                                    fullWidth
+                                                    sx={{ my: 1 }}
+                                                >
+                                                    <TextInput
+                                                        placeholder={`${t(
+                                                            "item:recipe"
+                                                        )} ${t(
+                                                            "item:step"
+                                                        )} - ${count + 1}`}
+                                                        label={`${t(
+                                                            "item:recipe"
+                                                        )} ${t(
+                                                            "item:step"
+                                                        )} - ${count + 1}`}
+                                                        name={`recipe${count}`}
+                                                        onChange={
+                                                            handleRecipeChange
+                                                        }
+                                                        value={
+                                                            recipeList[count] ??
+                                                            ""
+                                                        }
+                                                    />
+                                                </FormControl>
+                                            </Grid>
+                                        </React.Fragment>
+                                    )
+                                )}
+                            </Grid>
+
+                            <Divider sx={{ my: 1 }} />
+
+                            {/* Images section */}
+                            <Typography variant="h6" my={1}>
+                                {t("item:images")}
+                            </Typography>
+
+                            <input
+                                id="itemImagesUploadInput"
+                                type="file"
+                                accept=".png, .jpg, .jpeg"
+                                style={{ visibility: "hidden" }}
+                                multiple={true}
+                                onChange={handleUploadChange}
+                            />
+
+                            <Button
+                                variant="outlined"
+                                onClick={() =>
+                                    document
+                                        .getElementById("itemImagesUploadInput")
+                                        .click()
+                                }
+                            >
+                                <CameraAltRoundedIcon />
+                            </Button>
+
+                            <Grid container>
+                                {editMode &&
+                                    formValues?.images?.map((imageUrl, idx) => (
+                                        <Card
+                                            className="container"
+                                            key={idx}
+                                            elevation={3}
+                                            sx={{ m: 2 }}
+                                        >
+                                            <img
+                                                src={imageUrl}
+                                                key={idx}
+                                                className="uploadedImage"
+                                                style={{
+                                                    height: "200px",
+                                                    width: "200px",
+                                                }}
+                                            />
+                                            <div className="overlay">
+                                                <Button
+                                                    className="text"
+                                                    size="large"
+                                                    sx={{ fontSize: "30px" }}
+                                                    onClick={() =>
+                                                        handleImageDelete(
+                                                            idx,
+                                                            1
                                                         )
                                                     }
                                                 >
                                                     ❌
                                                 </Button>
-                                            </Box>
+                                            </div>
                                         </Card>
-                                    </Grid>
-                                )
-                            )}
-                        </Grid>
-
-                        <Divider sx={{ my: 1 }} />
-
-                        {/* Recipe section */}
-                        <Typography variant="h6">{t('item:recipe')}</Typography>
-
-                        <Grid container my={2}>
-                            {[...Array(recipeListCount).keys()].map((count) => (
-                                <React.Fragment key={count}>
-                                    <Grid
-                                        item
-                                        xs={2}
-                                        md={2}
-                                        sm={2}
-                                        sx={{ my: 1 }}
-                                    >
-                                        <Button variant="contained">
-                                            {t('item:step')} - {count + 1}
-                                        </Button>
-                                    </Grid>
-                                    <Grid
-                                        item
-                                        xs={2}
-                                        sm={1}
-                                        md={1}
-                                        textAlign="start"
-                                        sx={{ my: 1 }}
-                                    >
-                                        <Button
-                                            onClick={() =>
-                                                setRecipeListCount(
-                                                    (count) => count + 1
-                                                )
-                                            }
-                                        >
-                                            ➕
-                                        </Button>
-                                        <Button
-                                            onClick={() =>
-                                                handleRecipeRemove(count)
-                                            }
-                                        >
-                                            ➖
-                                        </Button>
-                                    </Grid>
-                                    <Grid
-                                        item
-                                        xs={8}
-                                        sm={9}
-                                        md={9}
-                                        textAlign="start"
-                                    >
-                                        <FormControl fullWidth sx={{ my: 1 }}>
-                                            <TextInput
-                                                placeholder={`${t('item:recipe')} ${t('item:step')} - ${
-                                                    count + 1
-                                                }`}
-                                                label={`${t('item:recipe')} ${t('item:step')} - ${
-                                                    count + 1
-                                                }`}
-                                                name={`recipe${count}`}
-                                                onChange={handleRecipeChange}
-                                                value={recipeList[count] ?? ""}
-                                            />
-                                        </FormControl>
-                                    </Grid>
-                                </React.Fragment>
-                            ))}
-                        </Grid>
-
-                        <Divider sx={{ my: 1 }} />
-
-                        {/* Images section */}
-                        <Typography variant="h6" my={1}>
-                            {t('item:images')}
-                        </Typography>
-
-                        <input
-                            id="itemImagesUploadInput"
-                            type="file"
-                            accept=".png, .jpg, .jpeg"
-                            style={{ visibility: "hidden" }}
-                            multiple={true}
-                            onChange={handleUploadChange}
-                        />
-
-                        <Button
-                            variant="outlined"
-                            onClick={() =>
-                                document
-                                    .getElementById("itemImagesUploadInput")
-                                    .click()
-                            }
-                        >
-                            <CameraAltRoundedIcon />
-                        </Button>
-
-                        <Grid container>
-                            {editMode &&
-                                formValues?.images?.map((imageUrl, idx) => (
+                                    ))}
+                                {allImages.map((imageData, idx) => (
                                     <Card
                                         className="container"
                                         key={idx}
@@ -778,7 +869,9 @@ const MenuForm = () => {
                                         sx={{ m: 2 }}
                                     >
                                         <img
-                                            src={imageUrl}
+                                            src={URL.createObjectURL(
+                                                imageData.fileData
+                                            )}
                                             key={idx}
                                             className="uploadedImage"
                                             style={{
@@ -792,7 +885,7 @@ const MenuForm = () => {
                                                 size="large"
                                                 sx={{ fontSize: "30px" }}
                                                 onClick={() =>
-                                                    handleImageDelete(idx, 1)
+                                                    handleImageDelete(idx, 0)
                                                 }
                                             >
                                                 ❌
@@ -800,72 +893,45 @@ const MenuForm = () => {
                                         </div>
                                     </Card>
                                 ))}
-                            {allImages.map((imageData, idx) => (
-                                <Card
-                                    className="container"
-                                    key={idx}
-                                    elevation={3}
-                                    sx={{ m: 2 }}
-                                >
-                                    <img
-                                        src={URL.createObjectURL(
-                                            imageData.fileData
-                                        )}
-                                        key={idx}
-                                        className="uploadedImage"
-                                        style={{
-                                            height: "200px",
-                                            width: "200px",
-                                        }}
-                                    />
-                                    <div className="overlay">
-                                        <Button
-                                            className="text"
-                                            size="large"
-                                            sx={{ fontSize: "30px" }}
-                                            onClick={() =>
-                                                handleImageDelete(idx, 0)
-                                            }
-                                        >
-                                            ❌
-                                        </Button>
-                                    </div>
-                                </Card>
-                            ))}
+                            </Grid>
+
+                            <Divider sx={{ my: 1 }} />
                         </Grid>
+                        <Grid item xs={2} md={2} sm={2}></Grid>
 
-                        <Divider sx={{ my: 1 }} />
-                    </Grid>
-                    <Grid item xs={2} md={2} sm={2}></Grid>
-
-                    <Grid
-                        item
-                        xs={12}
-                        md={12}
-                        sm={12}
-                        sx={{ mt: 2, mb: 2 }}
-                        textAlign="center"
-                    >
-                        <Button
-                            variant="contained"
-                            sx={{ mx: 2 }}
-                            size="large"
-                            type="submit"
-                            disabled={hasErrors}
+                        <Grid
+                            item
+                            xs={12}
+                            md={12}
+                            sm={12}
+                            sx={{ mt: 2, mb: 2 }}
+                            textAlign="center"
                         >
-                            {t(`common:${(editMode ? "Edit" : "Add").toLowerCase()}`)}
-                        </Button>
-                        <Button
-                            variant="contained"
-                            sx={{ mx: 2 }}
-                            size="large"
-                            onClick={() => navigate("/home")}
-                        >
-                            {t('common:cancel')}
-                        </Button>
+                            <Button
+                                variant="contained"
+                                sx={{ mx: 2 }}
+                                size="large"
+                                type="submit"
+                                disabled={hasErrors}
+                            >
+                                {t(
+                                    `common:${(editMode
+                                        ? "Edit"
+                                        : "Add"
+                                    ).toLowerCase()}`
+                                )}
+                            </Button>
+                            <Button
+                                variant="contained"
+                                sx={{ mx: 2 }}
+                                size="large"
+                                onClick={() => navigate("/home")}
+                            >
+                                {t("common:cancel")}
+                            </Button>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </form>
+                </form>
             </Grid>
         </Grid>
     );

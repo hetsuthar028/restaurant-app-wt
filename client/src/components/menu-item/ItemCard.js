@@ -19,7 +19,6 @@ const ItemCard = (props) => {
             <Grid container>
                 <Grid item xs={10} sm={10} md={10} sx={{ pl: 2, py: 1 }}>
                     <Typography variant="h6" fontWeight="bold">
-                        {/* Chilli Paneer */}
                         {menuItem.name}
                     </Typography>
                 </Grid>
@@ -43,8 +42,8 @@ const ItemCard = (props) => {
 
                 <Grid item xs={12} md={12} sm={12}>
                     <img
-                        src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Nnx8Zm9vZHxlbnwwfHwwfHw%3D"
-                        // src={menuItem.images[0]}
+                        // src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Nnx8Zm9vZHxlbnwwfHwwfHw%3D"
+                        src={menuItem.images[0]}
                         style={{ height: "200px", width: "100%" }}
                     />
                 </Grid>

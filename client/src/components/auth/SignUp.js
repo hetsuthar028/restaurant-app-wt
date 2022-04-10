@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-    Grid,
-    Typography,
-    FormControl,
-    TextField,
-    Button,
-    FormHelperText,
-    Card,
-    Divider,
-    Box,
-} from "@mui/material";
+import { Grid, Typography, FormControl, Button } from "@mui/material";
 import Helpertext from "../shared/HelperText";
 import TextInput from "../shared/TextInput";
 import { useSnackbar } from "notistack";
@@ -17,9 +7,9 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
-import { GoogleLogin } from "react-google-login";
-import FacebookLogin from 'react-facebook-login';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
+import GoogleSignIn from "./GoogleSignIn";
+import FacebookSignIn from "./FacebookSignIn";
 
 const initialFormValues = {
     email: "",
@@ -31,18 +21,16 @@ const initialFormValues = {
 const emailRegExp =
     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
-const clientId = process.env.REACT_APP_GOOGLE_CLIENTID;
-
 const SignUp = () => {
     const [formValues, setFormValues] = useState(initialFormValues);
     const [formErrors, setFormErrors] = useState({});
     const [hasErrors, setHasErrors] = useState(true);
     const [showPasswordHelper, setShowPasswordHelper] = useState(false);
     const [showOtpForm, setShowOtpForm] = useState(false);
-    const [otp, setOtp] = useState('');
+    const [otp, setOtp] = useState("");
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
-    const { t } = useTranslation(['auth']);
+    const { t } = useTranslation(["auth"]);
 
     const validateInput = (name, value) => {
         if (name === "email" && !emailRegExp.test(value)) {
@@ -121,49 +109,69 @@ const SignUp = () => {
         e.preventDefault();
 
         // Check if the user already exists before sending OTP
-        axios.get(`http://localhost:5001/user/auth/exists/${formValues.email}`)
+        axios
+            .get(`http://localhost:5001/user/auth/exists/${formValues.email}`)
             .then((response) => {
-                return enqueueSnackbar('User already exists', { variant: 'warning' });
+                return enqueueSnackbar("User already exists", {
+                    variant: "warning",
+                });
             })
             .catch((existsErr) => {
-
-                if(existsErr?.response?.data?.message === 'User does not exists'){
-                    enqueueSnackbar('Sending email with OTP...', { variant: 'success' });
+                if (
+                    existsErr?.response?.data?.message ===
+                    "User does not exists"
+                ) {
+                    enqueueSnackbar("Sending email with OTP...", {
+                        variant: "success",
+                    });
                     setShowOtpForm(true);
-                    axios.post(`http://localhost:5001/otp/send`, {
-                        to: formValues.email,
-                    })
-                    .then((response) => {
-                        if(response.data.success === true){
-                            return enqueueSnackbar('Email sent! ✔️', { variant: 'success' });        
-                        }
-                    })
-                    .catch((error) => {
-                        console.log("Error occured in sending OTP:", error?.response?.data);
-                        return enqueueSnackbar(error?.response?.data?.message ?? 'Please refresh the page and try again!', { variant: 'warning' });
-                    })
-                    
+                    axios
+                        .post(`http://localhost:5001/otp/send`, {
+                            to: formValues.email,
+                        })
+                        .then((response) => {
+                            if (response.data.success === true) {
+                                return enqueueSnackbar("Email sent! ✔️", {
+                                    variant: "success",
+                                });
+                            }
+                        })
+                        .catch((error) => {
+                            console.error(
+                                "Error occured in sending OTP:",
+                                error?.response?.data
+                            );
+                            return enqueueSnackbar(
+                                error?.response?.data?.message ??
+                                    "Please refresh the page and try again!",
+                                { variant: "warning" }
+                            );
+                        });
                 } else {
-                    return enqueueSnackbar('Some error occured, Please try again in a while', { variant: 'error' });
+                    return enqueueSnackbar(
+                        "Some error occured, Please try again in a while",
+                        { variant: "error" }
+                    );
                 }
-            })
-    }
+            });
+    };
 
     const handleOtpVerification = (e) => {
         e.preventDefault();
-        axios.post(`http://localhost:5001/otp/verify`, {
-            email: formValues.email,
-            otp: otp
-        }).then((response) => {
-            console.log("OTP Verification response:", response.data);
-            enqueueSnackbar('OTP verified ✔️', {variant: 'success'});
-            handleRegularSignUp();
-        })
-        .catch((error) => {
-            console.log("Error in verifying otp");
-            enqueueSnackbar('Invalid OTP', {variant: 'error'});
-        })
-    }
+        axios
+            .post(`http://localhost:5001/otp/verify`, {
+                email: formValues.email,
+                otp: otp,
+            })
+            .then((response) => {
+                enqueueSnackbar("OTP verified ✔️", { variant: "success" });
+                handleRegularSignUp();
+            })
+            .catch((error) => {
+                console.error("Error in verifying otp", error);
+                enqueueSnackbar("Invalid OTP", { variant: "error" });
+            });
+    };
 
     const handleRegularSignUp = () => {
         // e.preventDefault();
@@ -185,64 +193,6 @@ const SignUp = () => {
                 );
             });
     };
-
-    const onGoogleAuthSuccess = (res) => {
-        console.log("Google Login:", res);
-        console.log("Google Login Success", res.profileObj);
-        let bearer = { login_type: "google", token: res.tokenId };
-        let { email, name: username, imageUrl: profile_url } = res.profileObj;
-
-        axios
-            .post(`http://localhost:5001/user/auth/google/signin`, {
-                email,
-                username,
-                profile_url,
-                authToken: res.tokenId
-            })
-            .then((response) => {
-                window.localStorage.setItem("bearer", JSON.stringify(bearer));
-                enqueueSnackbar("Google Sign In Successful!", {
-                    variant: "success",
-                });
-                return navigate("/home");
-            })
-            .catch((err) => {
-                return enqueueSnackbar(
-                    err?.response?.data?.message ?? "Please try again!",
-                    { variant: "error" }
-                );
-            });
-    };
-
-    const onGoogleAuthFailure = (res) => {
-        console.log("Google login failed:", res);
-    };
-
-    const onFacebookAuthSuccess = (response) => {
-        console.log('Facebook auth response:', response);
-        let {name, picture, email, accessToken, id} = response;
-        let bearer = {login_type: 'facebook', token: accessToken};
-        
-        axios.post(`http://localhost:5001/user/auth/facebook/signin`, {
-            email,
-            name,
-            picture: picture.data.url,
-            id,
-            accessToken
-        }).then((response) => {
-            window.localStorage.setItem('bearer', JSON.stringify(bearer));
-            enqueueSnackbar("Facebook Sign In Successful!", {
-                variant: "success",
-            });
-            return navigate('/home');
-        })
-        .catch((err) => {
-            return enqueueSnackbar(
-                err?.response?.data?.message ?? "Please try again!",
-                { variant: "error" }
-            );
-        });
-    }
 
     return (
         <Grid container>
@@ -272,19 +222,21 @@ const SignUp = () => {
                     fontFamily="Bartender SmCond Serif Pressed"
                     sx={{ color: "#DD7230" }}
                 >
-                    {t('signup')}
+                    {t("signup")}
                 </Typography>
                 {showOtpForm ? (
                     <form method="POST" onSubmit={handleOtpVerification}>
                         <center>
-                        <FormControl fullWidth sx={{ width: "80%" }}>
+                            <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="otp"
                                     placeholder="OTP"
                                     type="number"
                                     label="OTP"
                                     value={otp}
-                                    onChange={(e) => setOtp(parseInt(e.target.value))}
+                                    onChange={(e) =>
+                                        setOtp(parseInt(e.target.value))
+                                    }
                                 />
                             </FormControl>
                             <FormControl fullWidth sx={{ width: "80%" }}>
@@ -306,9 +258,9 @@ const SignUp = () => {
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="email"
-                                    placeholder={t('emailAddress')}
+                                    placeholder={t("emailAddress")}
                                     type="email"
-                                    label={t('emailAddress')}
+                                    label={t("emailAddress")}
                                     value={formValues.email}
                                     onChange={handleInputChange}
                                     error={!!formErrors.email}
@@ -322,8 +274,8 @@ const SignUp = () => {
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <TextInput
                                     name="username"
-                                    placeholder={t('username')}
-                                    label={t('username')}
+                                    placeholder={t("username")}
+                                    label={t("username")}
                                     value={formValues.username}
                                     onChange={handleInputChange}
                                     error={!!formErrors.username}
@@ -338,8 +290,8 @@ const SignUp = () => {
                                 <TextInput
                                     name="password"
                                     type="password"
-                                    placeholder={t('password')}
-                                    label={t('password')}
+                                    placeholder={t("password")}
+                                    label={t("password")}
                                     value={formValues.password}
                                     onChange={handleInputChange}
                                     error={showPasswordHelper}
@@ -486,8 +438,8 @@ const SignUp = () => {
                                 <TextInput
                                     name="confirmPassword"
                                     type="password"
-                                    placeholder={t('confirmPassword')}
-                                    label={t('confirmPassword')}
+                                    placeholder={t("confirmPassword")}
+                                    label={t("confirmPassword")}
                                     value={formValues.confirmPassword}
                                     onChange={handleInputChange}
                                     error={!!formErrors.confirmPassword}
@@ -506,7 +458,7 @@ const SignUp = () => {
                                     type="submit"
                                     disabled={hasErrors}
                                 >
-                                    {t('signup')}
+                                    {t("signup")}
                                 </Button>
                             </FormControl>
                         </center>
@@ -514,23 +466,10 @@ const SignUp = () => {
                 )}
                 <center>
                     <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                        <GoogleLogin
-                            clientId={clientId}
-                            buttonText={t('signInWithGoogle')}
-                            onSuccess={onGoogleAuthSuccess}
-                            onFailure={onGoogleAuthFailure}
-                            cookiePolicy={"single_host_origin"}
-                        />
-                        {/* <Button variant="contained">Google</Button> */}
+                        <GoogleSignIn />
                     </FormControl>
                     <FormControl fullWidth sx={{ width: "30%", m: 2 }}>
-                        <FacebookLogin
-                            appId={process.env.REACT_APP_FACEBOOK_ID}
-                            fields="name,email,picture"
-                            callback={onFacebookAuthSuccess}
-                            size="small"
-                            />
-                        {/* <Button variant="contained">Facebook</Button> */}
+                        <FacebookSignIn />
                     </FormControl>
 
                     <FormControl fullWidth sx={{ width: "80%" }}>
