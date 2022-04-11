@@ -9,6 +9,9 @@ import {
     MenuItem,
     ListItemIcon,
     Divider,
+    FormControl,
+    Select,
+    InputLabel,
 } from "@mui/material";
 import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
@@ -16,17 +19,38 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { useTranslation } from "react-i18next";
+import { makeStyles } from "@mui/styles";
+
+const useStyles = makeStyles((theme) => ({
+    selectDark: {
+        "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#DD7230",
+            color: "white",
+        },
+        "& .MuiOutlinedInput-input": {
+            color: "white",
+        },
+    },
+    textDark: {
+        "& .MuiOutlinedInput-root, .MuiInputBase-sizeSmall, MuiInputBase-colorPrimary":
+            {
+                border: "1px solid red",
+            },
+    },
+}));
 
 const Navbar = () => {
+    const classes = useStyles();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [profileUrl, setProfileUrl] = useState("");
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [language, setLanguage] = useState("en-US");
 
     const open = Boolean(anchorEl);
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
-    const { t } = useTranslation(["auth", "nav"]);
+    const { t, i18n } = useTranslation(["auth", "nav"]);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -34,6 +58,10 @@ const Navbar = () => {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    useEffect(() => {
+        setLanguage(window.localStorage.getItem("i18nextLng"));
+    }, []);
 
     const verifyCurrentUser = async () => {
         try {
@@ -62,6 +90,11 @@ const Navbar = () => {
         return navigate("/login");
     };
 
+    const handleLanguageChange = (e) => {
+        setLanguage(e.target.value);
+        i18n.changeLanguage(e.target.value);
+    };
+
     useEffect(async () => {
         await verifyCurrentUser();
     }, []);
@@ -85,8 +118,8 @@ const Navbar = () => {
             <Grid
                 item
                 xs={12}
-                sm={6}
-                md={6}
+                sm={5}
+                md={5}
                 sx={{ display: "inline-flex", color: "#DD7230", py: 3 }}
             >
                 {isLoggedIn && (
@@ -138,8 +171,8 @@ const Navbar = () => {
             <Grid
                 item
                 xs={12}
-                sm={4}
-                md={4}
+                sm={5}
+                md={5}
                 textAlign="end"
                 sx={{
                     px: 2,
@@ -148,7 +181,35 @@ const Navbar = () => {
                     placeContent: "end",
                 }}
             >
-                <Button sx={{ border: "3px solid #DD7230", color: "#DD7230" }}>
+                <FormControl sx={{ minWidth: 120, mr: 2 }}>
+                    <InputLabel
+                        id="demo-simple-select-label"
+                        sx={{
+                            color: "white",
+                        }}
+                    >
+                        {t("nav:language")}
+                    </InputLabel>
+                    <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        label={t("home:Price")}
+                        name="price"
+                        size="medium"
+                        onChange={handleLanguageChange}
+                        className={classes.selectDark}
+                        value={language}
+                    >
+                        <MenuItem value={"en-US"}>🇺🇸 - English</MenuItem>
+                        <MenuItem value={"hn"}>🇮🇳 - Hindi</MenuItem>
+                        <MenuItem value={"fr"}>🇫🇷 - French</MenuItem>
+                        <MenuItem value={"de"}>🇩🇪 - German</MenuItem>
+                    </Select>
+                </FormControl>
+                <Button
+                    sx={{ border: "3px solid #DD7230", color: "#DD7230" }}
+                    onClick={() => i18n.changeLanguage("hn")}
+                >
                     tel: 1111-111-111
                 </Button>
                 {isLoggedIn ? (

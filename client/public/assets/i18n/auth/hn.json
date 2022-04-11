@@ -1,0 +1,16 @@
+{
+    "signup": "साइन अप करें",
+    "emailAddress": "ईमेल पता",
+    "username": "उपयोगकर्ता नाम",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि कीजिये",
+    "alreadyHaveAnAccount": "पहले से ही एक खाता है? यहां लॉगिन करें",
+    "dontHaveAnAccount": "खाता नहीं है? यहां साइन अप करें",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "signInWithGoogle": "Google के साथ साइन इन करें",
+    "login": "लॉग इन करें",
+    "getOTP": "ओटीपी प्राप्त करें",
+    "verifyOTP": "ओटीपी सत्यापित करें",
+    "newPassword": "नया पासवर्ड",
+    "changePassword": "पासवर्ड बदलें"
+}

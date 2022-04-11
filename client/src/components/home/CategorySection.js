@@ -33,7 +33,7 @@ const CategorySection = (props) => {
                     my={1}
                     sx={{color: '#DD7230'}}
                 >
-                    {t(`home:${category.name.toString().toLowerCase()}`)}
+                    {t(`home:${category.name.toString().toLowerCase().split(' ').join('')}`)}
                 </Typography>
                 <Divider sx={{ mx: 2, background: '#DD7230' }} />
 

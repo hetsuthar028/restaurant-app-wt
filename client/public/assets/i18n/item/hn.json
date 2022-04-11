@@ -1,0 +1,20 @@
+{
+    "formTitleAdd": "एक मेनू आइटम जोड़ें",
+    "formTitleEdit": "एक मेनू आइटम संपादित करें",
+    "formSubtitle": "आइटम विवरण",
+    "itemName": "आइटम नाम",
+    "description": "विवरण",
+    "courseType": "कोर्स का प्रकार",
+    "price": "कीमत (₹)",
+    "preparationTime": "तैयारी का समय (मिनटों में)",
+    "jain": "जैन",
+    "ingredient_one": "घटक",
+    "ingredient_other": "अवयव",
+    "addAnIngredient": "एक सामग्री जोड़ें",
+    "recipe": "व्यंजन विधि",
+    "step": "कदम",
+    "images": "इमेजिस",
+    "name": "नाम",
+    "amount": "राशि",
+    "quantity": "मात्रा"
+}

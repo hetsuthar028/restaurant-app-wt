@@ -2,10 +2,12 @@ import React from "react";
 import { Card, Grid, Typography, Button } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const ItemCard = (props) => {
     const { menuItem, handleOpenDeleteDialog, isAdmin } = props;
     const navigate = useNavigate();
+    const { t } = useTranslation(["common"]);
 
     const handleEdit = (menuId) => {
         navigate("/menu/add", {
@@ -65,7 +67,7 @@ const ItemCard = (props) => {
                                     fontFamily="Bartender SmCond Serif Pressed"
                                     onClick={() => handleEdit(menuItem._id)}
                                 >
-                                    Edit
+                                    {t("common:edit")}
                                 </Typography>
                             </Button>
                             <Button
@@ -79,7 +81,7 @@ const ItemCard = (props) => {
                                         handleOpenDeleteDialog(menuItem._id)
                                     }
                                 >
-                                    Delete
+                                    {t("common:delete")}
                                 </Typography>
                             </Button>
                         </React.Fragment>
