@@ -8,5 +8,8 @@
     "submit": "Soumettre",
     "delete": "Supprimer",
     "add": "Ajouter",
-    "edit": "Éditer"
+    "edit": "Éditer",
+    "pageNotExistsTitle": "Cette page n'existe pas !",
+    "pageNotExistsMessage": "Désolé, la page que vous recherchez est introuvable.",
+    "visitHomeBtn": "Visitez la maison"
 }

@@ -1,8 +1,12 @@
 import React from "react";
 import { Grid, Typography, Button } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 const NotFoundPage = () => {
+
+    const { t } = useTranslation(["common"]);
+
     return (
         <Grid container sx={{background: `url(https://images.unsplash.com/photo-1554050857-c84a8abdb5e2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=327&q=80)`}}>
             <Grid
@@ -27,10 +31,10 @@ const NotFoundPage = () => {
                         404
                     </Typography>
                     <Typography fontFamily="Bartender SmCond Serif Pressed" variant="h3" sx={{color: '#ccc'}}>
-                        That page doesn't exist!
+                        {t('pageNotExistsTitle')}
                     </Typography>
                     <Typography fontFamily="lato" variant="h6" color="GrayText">
-                        Sorry, the page you were looking for could not be found.
+                        {t('pageNotExistsMessage')}
                     </Typography>
                     <Button size="large" sx={{ mt: 2 }}>
                         <Link
@@ -38,7 +42,7 @@ const NotFoundPage = () => {
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
                             <Typography fontFamily="Bartender SmCond Serif Pressed" variant="h3">
-                                Visit Home
+                                {t('visitHomeBtn')}
                             </Typography>
                         </Link>
                     </Button>

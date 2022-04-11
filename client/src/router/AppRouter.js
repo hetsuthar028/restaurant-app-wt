@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from '../components/auth/Login';
-import SignUp from '../components/auth/SignUp';
-import Home from '../components/home/Home';
 import WelcomePage from '../components/welcome-screen/WelcomePage';
-import MenuForm from '../components/menu-item/MenuForm';
-import NotFoundPage from '../components/error/NotFoundPage';
+const Home = React.lazy(() => import('../components/home/Home'));
+const Login = React.lazy(() => import('../components/auth/Login'));
+const SignUp = React.lazy(() => import('../components/auth/SignUp'));
+const MenuForm = React.lazy(() => import('../components/menu-item/MenuForm'));
+const NotFoundPage = React.lazy(() => import('../components/error/NotFoundPage'));
 
 const AppRouter = () => {
     return (

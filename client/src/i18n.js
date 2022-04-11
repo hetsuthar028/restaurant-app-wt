@@ -13,7 +13,7 @@ i18n
         },
         fallbackLng: 'en',
         debug: true,
-        ns: ["common", "home", "auth", "welcome", "nav"],
+        ns: ["common", "home", "auth", "welcome", "nav", "item"],
     });
 
 export default i18n;    

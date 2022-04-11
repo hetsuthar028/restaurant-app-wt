@@ -8,5 +8,8 @@
     "submit": "Einreichen",
     "delete": "Löschen",
     "add": "Hinzufügen",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "pageNotExistsTitle": "Diese Seite existiert nicht!",
+    "pageNotExistsMessage": "Entschuldigung, die von Ihnen gesuchte Seite konnte nicht gefunden werden.",
+    "visitHomeBtn": "Besuchen Sie Startseite"
 }
