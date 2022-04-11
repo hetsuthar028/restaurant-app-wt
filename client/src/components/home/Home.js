@@ -230,13 +230,13 @@ const Home = () => {
                                 color: "white",
                             }}
                         >
-                            {t("home:Price")}
+                            {t("home:price")}
                         </InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={availability}
-                            label={t("home:Price")}
+                            label={t("home:price")}
                             name="price"
                             size="small"
                             onChange={handleFilterChange}

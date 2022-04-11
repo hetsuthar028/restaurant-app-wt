@@ -8,7 +8,7 @@
     "beverages": "Breuvages",
     "pizza": "Pizza",
     "dessert": "Dessert",
-    "main course": "Plat principal",
+    "maincourse": "Plat principal",
     "deleteWarning": "Cliquez sur le bouton Supprimer pour supprimer cet élément de menu de la liste. Cela supprimera l'élément des enregistrements et ne sera plus disponible plus tard !",
     "noMenuFoundMessage": "Oups! Aucun élément de menu trouvé.",
     "veg": "Légumes",

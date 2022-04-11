@@ -8,7 +8,7 @@
     "beverages": "Beverages",
     "pizza": "Pizza",
     "dessert": "Dessert",
-    "main course": "Main Course",
+    "maincourse": "Main Course",
     "deleteWarning": "Click on delete button to remove this menu item from the list. Doing this will remove item from records and won't be available later!",
     "noMenuFoundMessage": "Oops! No menu items found.",
     "veg": "Veg",

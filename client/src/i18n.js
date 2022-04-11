@@ -11,7 +11,7 @@ i18n
         backend: {
             loadPath: '/assets/i18n/{{ns}}/{{lng}}.json'
         },
-        fallbackLng: 'en',
+        fallbackLng: 'en-US',
         debug: true,
         ns: ["common", "home", "auth", "welcome", "nav", "item"],
     });
