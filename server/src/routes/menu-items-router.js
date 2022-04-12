@@ -25,6 +25,7 @@ menuItemsRouter.post("/add", menuItemValidator, verifyMyToken, isSessionActive, 
                     jobId: uuid4(),
                     menuId: menuItem._id,
                     images: req.body.images,
+                    authHeader: req.headers.authorization,
                 });
                 return res.status(201).send({ success: true, menuItem });
             })

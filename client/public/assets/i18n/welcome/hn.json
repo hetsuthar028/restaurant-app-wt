@@ -1,7 +1,11 @@
 {
+    "contactUs": "Contact Us",
+    "aboutUs": "About Us",
     "addressPart1": "१५१० साउथ मेन स्ट्रीट",
     "addressPart2": "लास वेगास, एनवी ८९१०४",
     "addressPart3": "एबल बेकर ब्रूइंग के अंदर स्थित है",
     "addressPart4": "७०२.९४७.६६५५ ",
-    "sunday": "रविवार"
+    "sunday": "रविवार",
+    "tuesdayShort": "मंगल",
+    "saturdayShort": "शनि"
 }

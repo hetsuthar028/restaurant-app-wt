@@ -44,6 +44,7 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [profileUrl, setProfileUrl] = useState("");
+    const [username, setUsername] = useState('');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [language, setLanguage] = useState("en-US");
 
@@ -76,6 +77,7 @@ const Navbar = () => {
             setIsAdmin(response.data.user.is_admin);
             setIsLoggedIn(true);
             setProfileUrl(response.data.user.profile_url);
+            setUsername(response.data.user.username);
             return;
         } catch (error) {
             console.error("Error fetching current user in home:", error);
@@ -201,16 +203,15 @@ const Navbar = () => {
                         value={language}
                     >
                         <MenuItem value={"en-US"}>🇺🇸 - English</MenuItem>
-                        <MenuItem value={"hn"}>🇮🇳 - Hindi</MenuItem>
-                        <MenuItem value={"fr"}>🇫🇷 - French</MenuItem>
-                        <MenuItem value={"de"}>🇩🇪 - German</MenuItem>
+                        <MenuItem value={"hn"}>🇮🇳 - हिन्दी</MenuItem>
+                        <MenuItem value={"fr"}>🇫🇷 - Français</MenuItem>
+                        <MenuItem value={"de"}>🇩🇪 - Deutsch</MenuItem>
                     </Select>
                 </FormControl>
                 <Button
                     sx={{ border: "3px solid #DD7230", color: "#DD7230" }}
-                    onClick={() => i18n.changeLanguage("hn")}
                 >
-                    tel: 1111-111-111
+                    {t('nav:contactNumber')}
                 </Button>
                 {isLoggedIn ? (
                     <React.Fragment>
@@ -271,20 +272,20 @@ const Navbar = () => {
                             }}
                         >
                             <MenuItem>
-                                <Avatar /> Profile
+                                <Avatar /> {username ?? ''}
                             </MenuItem>
                             <Divider />
                             <MenuItem>
                                 <ListItemIcon>
                                     <Settings fontSize="small" />
                                 </ListItemIcon>
-                                Settings
+                                {t('nav:settings')}
                             </MenuItem>
                             <MenuItem onClick={handleLogout}>
                                 <ListItemIcon>
                                     <Logout fontSize="small" />
                                 </ListItemIcon>
-                                Logout
+                                {t('nav:logout')}
                             </MenuItem>
                         </Menu>
                     </React.Fragment>

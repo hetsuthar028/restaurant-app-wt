@@ -82,7 +82,7 @@ const WelcomePage = () => {
                             sx={{ color: "#ccc" }}
                             variant="h6"
                         >
-                            <span style={{ color: "#DD7230" }}>TUE-SAT:</span>{" "}
+                            <span style={{ color: "#DD7230" }}>{t('welcome:tuesdayShort')}-{t('welcome:saturdayShort')}:</span>{" "}
                             12PM-10PM
                             <br />
                             <span style={{ color: "#DD7230" }}>

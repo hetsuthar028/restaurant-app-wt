@@ -1,7 +1,11 @@
 {
+    "contactUs": "Kontaktiere uns",
+    "aboutUs": "Über uns",
     "addressPart1": "1510 Südliche Hauptstraße",
     "addressPart2": "Las Vegas, NV 89104",
     "addressPart3": "Befindet sich innerhalb von Able Baker Brewing",
     "addressPart4": "702.479.6355 ",
-    "sunday": "SONNTAG"
+    "sunday": "SONNTAG",
+    "tuesdayShort": "Die",
+    "saturdayShort": "Sam"
 }
