@@ -5,11 +5,11 @@ import TextInput from "../shared/TextInput";
 import { useSnackbar } from "notistack";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import { useTranslation } from "react-i18next";
 import GoogleSignIn from "./GoogleSignIn";
 import FacebookSignIn from "./FacebookSignIn";
+import PasswordHelper from "./PasswordHelper";
+import passwordValidator from "../../utils/passwordValidator";
 
 const initialFormValues = {
     email: "",
@@ -42,29 +42,7 @@ const SignUp = () => {
         }
 
         if (name === "password") {
-            let passwordTest = {
-                alphabet: false,
-                digit: false,
-                minlength: false,
-                specialChar: false,
-            };
-
-            if (value.length < 8) {
-                passwordTest["minlength"] = true;
-            }
-            if (!/[a-zA-Z]/i.test(value)) {
-                passwordTest["alphabet"] = true;
-            }
-            if (!/[0-9]/i.test(value)) {
-                passwordTest["digit"] = true;
-            }
-            if (
-                !/[\!\@\#\$\%\^\&\*\)\(\+\=\.\<\>\{\}\[\]\:\;\'\"\|\~\`\_\-]/g.test(
-                    value
-                )
-            ) {
-                passwordTest["specialChar"] = true;
-            }
+            let passwordTest = passwordValidator(value);
 
             setShowPasswordHelper(
                 !Object.values(passwordTest).every((test) => test === false)
@@ -298,140 +276,7 @@ const SignUp = () => {
                                 />
                             </FormControl>
                             {showPasswordHelper && (
-                                <Grid container sx={{ width: "80%", my: 0.5 }}>
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        sm={3}
-                                        md={3}
-                                        textAlign="start"
-                                    >
-                                        {formErrors.password?.alphabet ? (
-                                            <CloseRoundedIcon
-                                                sx={{
-                                                    height: "20px",
-                                                    width: "auto",
-                                                    color: "red",
-                                                    display: "inline",
-                                                }}
-                                            />
-                                        ) : (
-                                            <DoneRoundedIcon
-                                                sx={{
-                                                    height: "20px",
-                                                    width: "auto",
-                                                    color: "green",
-                                                    display: "inline",
-                                                }}
-                                            />
-                                        )}
-                                        <Typography
-                                            variant="caption"
-                                            sx={{ display: "inline" }}
-                                        >
-                                            Alphabets
-                                        </Typography>
-                                    </Grid>
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        sm={3}
-                                        md={3}
-                                        textAlign="start"
-                                    >
-                                        {formErrors.password?.digit ? (
-                                            <CloseRoundedIcon
-                                                sx={{
-                                                    height: "20px",
-                                                    width: "auto",
-                                                    color: "red",
-                                                    display: "inline",
-                                                }}
-                                            />
-                                        ) : (
-                                            <DoneRoundedIcon
-                                                sx={{
-                                                    height: "20px",
-                                                    width: "auto",
-                                                    color: "green",
-                                                    display: "inline",
-                                                }}
-                                            />
-                                        )}
-                                        <Typography
-                                            variant="caption"
-                                            sx={{ display: "inline" }}
-                                        >
-                                            Digits
-                                        </Typography>
-                                    </Grid>
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        sm={3}
-                                        md={3}
-                                        textAlign="start"
-                                    >
-                                        {formErrors.password?.specialChar ? (
-                                            <CloseRoundedIcon
-                                                sx={{
-                                                    height: "20px",
-                                                    width: "auto",
-                                                    color: "red",
-                                                    display: "inline",
-                                                }}
-                                            />
-                                        ) : (
-                                            <DoneRoundedIcon
-                                                sx={{
-                                                    height: "20px",
-                                                    width: "auto",
-                                                    color: "green",
-                                                    display: "inline",
-                                                }}
-                                            />
-                                        )}
-                                        <Typography
-                                            variant="caption"
-                                            sx={{ display: "inline" }}
-                                        >
-                                            Special Characters
-                                        </Typography>
-                                    </Grid>
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        sm={3}
-                                        md={3}
-                                        textAlign="start"
-                                    >
-                                        {formErrors.password?.minlength ? (
-                                            <CloseRoundedIcon
-                                                sx={{
-                                                    height: "20px",
-                                                    width: "auto",
-                                                    color: "red",
-                                                    display: "inline",
-                                                }}
-                                            />
-                                        ) : (
-                                            <DoneRoundedIcon
-                                                sx={{
-                                                    height: "20px",
-                                                    width: "auto",
-                                                    color: "green",
-                                                    display: "inline",
-                                                }}
-                                            />
-                                        )}
-                                        <Typography
-                                            variant="caption"
-                                            sx={{ display: "inline" }}
-                                        >
-                                            More than 8 characters
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
+                                <PasswordHelper formErrors={formErrors} />
                             )}
 
                             <FormControl fullWidth sx={{ width: "80%" }}>

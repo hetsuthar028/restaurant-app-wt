@@ -8,6 +8,8 @@ import { useSnackbar } from "notistack";
 import { useTranslation } from "react-i18next";
 import GoogleSignIn from "./GoogleSignIn";
 import FacebookSignIn from "./FacebookSignIn";
+import PasswordHelper from "./PasswordHelper";
+import passwordValidator from "../../utils/passwordValidator";
 
 const initialFormValues = {
     email: "",
@@ -31,6 +33,8 @@ const Login = () => {
     const [showForgotForm, setShowForgotForm] = useState(false);
     const [showOTPForm, setShowOTPForm] = useState(false);
     const [showResetPwdForm, setShowResetPwdForm] = useState(false);
+    const [showPasswordHelper, setShowPasswordHelper] = useState(false);
+    const [passwordErrors, setPasswordErrors] = useState({});
     const [forgotPasswordData, setForgotPasswordData] = useState(
         initialForgotPasswordValues
     );
@@ -67,6 +71,20 @@ const Login = () => {
             ...forgotPasswordData,
             [e.target.name]: e.target.value,
         });
+
+        if(e.target.name === 'password'){
+            let pwdErrors = passwordValidator(e.target.value);
+            
+            setShowPasswordHelper(
+                !Object.values(pwdErrors).every((test) => test === false)
+            );
+
+            setPasswordErrors({
+                ...passwordErrors,
+                [e.target.name]: pwdErrors
+            })
+        }
+        
     };
 
     useEffect(() => {
@@ -76,6 +94,11 @@ const Login = () => {
             })
         );
     }, [formErrors]);
+
+
+    useEffect(() => {
+        return setHasErrors(!(Object.values(passwordErrors["password"] ?? {}).every((a) => a === false)));
+    },  [passwordErrors]);
 
     const handleRegularLogin = (e) => {
         e.preventDefault();
@@ -394,6 +417,8 @@ const Login = () => {
                                     onChange={handleForgotFormInputChange}
                                 />
                             </FormControl>
+                            { showPasswordHelper && (<PasswordHelper formErrors={passwordErrors} />) }
+                            
                             <FormControl fullWidth sx={{ width: "80%" }}>
                                 <Button
                                     variant="contained"
@@ -403,6 +428,7 @@ const Login = () => {
                                         mt: 2,
                                     }}
                                     type="submit"
+                                    disabled={hasErrors}
                                 >
                                     {t("changePassword")}
                                 </Button>
