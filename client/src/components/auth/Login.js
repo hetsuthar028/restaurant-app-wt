@@ -8,18 +8,11 @@ import { useSnackbar } from "notistack";
 import { useTranslation } from "react-i18next";
 import GoogleSignIn from "./GoogleSignIn";
 import FacebookSignIn from "./FacebookSignIn";
-import PasswordHelper from "./PasswordHelper";
-import passwordValidator from "../../utils/passwordValidator";
+import ForgotPasswordForm from "./ForgotPasswordForm";
 
 const initialFormValues = {
     email: "",
     password: "",
-};
-
-const initialForgotPasswordValues = {
-    email: "",
-    password: "",
-    otp: "",
 };
 
 const emailRegExp =
@@ -30,14 +23,7 @@ const Login = () => {
     const [formErrors, setFormErrors] = useState({});
     const [hasErrors, setHasErrors] = useState(true);
     const [showLoginForm, setShowLoginForm] = useState(true);
-    const [showForgotForm, setShowForgotForm] = useState(false);
-    const [showOTPForm, setShowOTPForm] = useState(false);
-    const [showResetPwdForm, setShowResetPwdForm] = useState(false);
-    const [showPasswordHelper, setShowPasswordHelper] = useState(false);
-    const [passwordErrors, setPasswordErrors] = useState({});
-    const [forgotPasswordData, setForgotPasswordData] = useState(
-        initialForgotPasswordValues
-    );
+
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
     const { t } = useTranslation(["auth"]);
@@ -66,27 +52,6 @@ const Login = () => {
         });
     };
 
-    const handleForgotFormInputChange = (e) => {
-        setForgotPasswordData({
-            ...forgotPasswordData,
-            [e.target.name]: e.target.value,
-        });
-
-        if(e.target.name === 'password'){
-            let pwdErrors = passwordValidator(e.target.value);
-            
-            setShowPasswordHelper(
-                !Object.values(pwdErrors).every((test) => test === false)
-            );
-
-            setPasswordErrors({
-                ...passwordErrors,
-                [e.target.name]: pwdErrors
-            })
-        }
-        
-    };
-
     useEffect(() => {
         setHasErrors(
             Object.keys(formErrors).some((key) => {
@@ -94,11 +59,6 @@ const Login = () => {
             })
         );
     }, [formErrors]);
-
-
-    useEffect(() => {
-        return setHasErrors(!(Object.values(passwordErrors["password"] ?? {}).every((a) => a === false)));
-    },  [passwordErrors]);
 
     const handleRegularLogin = (e) => {
         e.preventDefault();
@@ -127,116 +87,6 @@ const Login = () => {
             });
     };
 
-    const handleSendOTP = (e) => {
-        e.preventDefault();
-
-        // Verify whether user exists or not
-        axios
-            .get(
-                `http://localhost:5001/user/auth/exists/${forgotPasswordData.email}`
-            )
-            .then((response) => {
-                // User exists
-                if (response.data.user.auth_type != "normal") {
-                    return enqueueSnackbar(
-                        "Invalid password change request for this account",
-                        { variant: "warning" }
-                    );
-                }
-
-                enqueueSnackbar("Sending OTP via Email", {
-                    variant: "success",
-                });
-
-                axios
-                    .post(`http://localhost:5001/otp/send`, {
-                        to: forgotPasswordData.email,
-                    })
-                    .then((otpResp) => {
-                        setShowOTPForm(true);
-                        setShowForgotForm(false);
-                        setShowLoginForm(false);
-                        setShowResetPwdForm(false);
-                        return enqueueSnackbar("OTP Sent", {
-                            variant: "success",
-                        });
-                    })
-                    .catch((otpErr) => {
-                        console.error("OTP Error in Login:", otpErr?.response);
-                        return enqueueSnackbar(
-                            otpErr?.response?.data?.message ??
-                                "Error occured while sending OTP",
-                            { variant: "warning" }
-                        );
-                    });
-            })
-            .catch((err) => {
-                console.error(
-                    "Error in checking user existance in Login:",
-                    err.response
-                );
-                return enqueueSnackbar(
-                    err.response?.data?.message ?? "Invalid email",
-                    { variant: "warning" }
-                );
-            });
-    };
-
-    const handleVerifyOTP = (e) => {
-        e.preventDefault();
-
-        // Verify OTP
-        axios
-            .post(`http://localhost:5001/otp/verify`, {
-                email: forgotPasswordData.email,
-                otp: forgotPasswordData.otp,
-            })
-            .then((verifyResp) => {
-                setShowLoginForm(false);
-                setShowForgotForm(false);
-                setShowOTPForm(false);
-                setShowResetPwdForm(true);
-                return enqueueSnackbar("OTP Verified", { variant: "success" });
-            })
-            .catch((verifyErr) => {
-                console.error(
-                    "OTP Verify Error in Login:",
-                    verifyErr?.response
-                );
-                return enqueueSnackbar(
-                    verifyErr?.response?.data?.message ??
-                        "Some error occured, Please try again!",
-                    { variant: "error" }
-                );
-            });
-    };
-
-    const handlePasswordChange = (e) => {
-        e.preventDefault();
-
-        // Handle password change request
-        axios
-            .put(`http://localhost:5001/user/auth/password`, {
-                email: forgotPasswordData.email,
-                password: forgotPasswordData.password,
-            })
-            .then((passwordResp) => {
-                setShowLoginForm(true);
-                setShowResetPwdForm(false);
-                return enqueueSnackbar(
-                    passwordResp.data?.message ??
-                        "Password changed successfully",
-                    { variant: "success" }
-                );
-            })
-            .catch((passwordErr) => {
-                console.error(
-                    "Error in Password change in Login:",
-                    passwordErr
-                );
-            });
-    };
-
     return (
         <Grid container>
             <Grid item xs={0} md={7} sm={7}>
@@ -259,7 +109,7 @@ const Login = () => {
                 }}
             >
                 {/* Login Form */}
-                {showLoginForm && (
+                {showLoginForm ? (
                     <form method="POST" onSubmit={handleRegularLogin}>
                         <Typography variant="h4" textAlign="center" my={2}>
                             {t("login")}
@@ -302,7 +152,6 @@ const Login = () => {
                                 <Typography textAlign="end">
                                     <Button
                                         onClick={() => {
-                                            setShowForgotForm(true);
                                             setShowLoginForm(false);
                                         }}
                                     >
@@ -328,113 +177,8 @@ const Login = () => {
                             </FormControl>
                         </center>
                     </form>
-                )}
-
-                {/* Forgot Password ON - Email form */}
-                {showForgotForm && (
-                    <form method="POST" onSubmit={handleSendOTP}>
-                        <Typography variant="h4" textAlign="center" my={2}>
-                            {t("forgotPassword")}
-                        </Typography>
-
-                        <center>
-                            <FormControl fullWidth sx={{ width: "80%" }}>
-                                <TextInput
-                                    name="email"
-                                    placeholder={t("emailAddress")}
-                                    type="email"
-                                    label={t("emailAddress")}
-                                    value={forgotPasswordData?.email}
-                                    onChange={handleForgotFormInputChange}
-                                />
-                            </FormControl>
-                            <FormControl fullWidth sx={{ width: "80%" }}>
-                                <Button
-                                    variant="contained"
-                                    size="large"
-                                    sx={{
-                                        backgroundColor: "#DD7230",
-                                        mt: 2,
-                                    }}
-                                    type="submit"
-                                >
-                                    {t("getOTP")}
-                                </Button>
-                            </FormControl>
-                        </center>
-                    </form>
-                )}
-
-                {/* Forgot Password ON - OTP Form */}
-                {showOTPForm && (
-                    <form method="POST" onSubmit={handleVerifyOTP}>
-                        <Typography variant="h4" textAlign="center" my={2}>
-                            {t("forgotPassword")}
-                        </Typography>
-
-                        <center>
-                            <FormControl fullWidth sx={{ width: "80%" }}>
-                                <TextInput
-                                    name="otp"
-                                    placeholder="OTP"
-                                    type="number"
-                                    label="OTP"
-                                    value={forgotPasswordData.otp}
-                                    onChange={handleForgotFormInputChange}
-                                />
-                            </FormControl>
-                            <FormControl fullWidth sx={{ width: "80%" }}>
-                                <Button
-                                    variant="contained"
-                                    size="large"
-                                    sx={{
-                                        backgroundColor: "#DD7230",
-                                        mt: 2,
-                                    }}
-                                    type="submit"
-                                >
-                                    {t("verifyOTP")}
-                                </Button>
-                            </FormControl>
-                        </center>
-                    </form>
-                )}
-
-                {/* Forgot Password ON - Change Password Form */}
-                {showResetPwdForm && (
-                    <form method="POST" onSubmit={handlePasswordChange}>
-                        <Typography variant="h4" textAlign="center" my={2}>
-                            {t("forgotPassword")}
-                        </Typography>
-                        <center>
-                            <FormControl fullWidth sx={{ width: "80%" }}>
-                                <TextInput
-                                    name="password"
-                                    placeholder={t("newPassword")}
-                                    type="password"
-                                    label={t("newPassword")}
-                                    value={forgotPasswordData.password}
-                                    onChange={handleForgotFormInputChange}
-                                />
-                            </FormControl>
-                            { showPasswordHelper && (<PasswordHelper formErrors={passwordErrors} />) }
-                            
-                            <FormControl fullWidth sx={{ width: "80%" }}>
-                                <Button
-                                    variant="contained"
-                                    size="large"
-                                    sx={{
-                                        backgroundColor: "#DD7230",
-                                        mt: 2,
-                                    }}
-                                    type="submit"
-                                    disabled={hasErrors}
-                                >
-                                    {t("changePassword")}
-                                </Button>
-                            </FormControl>
-                        </center>
-                    </form>
+                ) : (
+                    <ForgotPasswordForm setShowLoginForm={setShowLoginForm} />
                 )}
 
                 <center>
