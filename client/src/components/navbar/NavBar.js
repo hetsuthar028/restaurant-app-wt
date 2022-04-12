@@ -45,6 +45,7 @@ const Navbar = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [profileUrl, setProfileUrl] = useState("");
     const [username, setUsername] = useState('');
+    const [user, setUser] = useState(null);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [language, setLanguage] = useState("en-US");
 
@@ -74,10 +75,12 @@ const Navbar = () => {
                     },
                 }
             );
-            setIsAdmin(response.data.user.is_admin);
+            let userData = response.data.user;
+            setIsAdmin(userData.is_admin);
             setIsLoggedIn(true);
-            setProfileUrl(response.data.user.profile_url);
-            setUsername(response.data.user.username);
+            setProfileUrl(userData.profile_url);
+            setUsername(userData.username);
+            (userData.auth_type === 'normal') ? (setUser(userData._id)) : (setUser(userData.email))
             return;
         } catch (error) {
             console.error("Error fetching current user in home:", error);
@@ -89,6 +92,7 @@ const Navbar = () => {
     const handleLogout = () => {
         window.localStorage.clear("bearer");
         enqueueSnackbar("Logged Out!", { variant: "success" });
+        axios.post(`http://localhost:5001/user/auth/session/erase`, {user: user})
         return navigate("/login");
     };
 

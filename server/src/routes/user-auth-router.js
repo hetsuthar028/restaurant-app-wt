@@ -258,4 +258,22 @@ userRouter.put('/password', (req, res, next) => {
     }
 })
 
+
+// @POST - Erase session
+userRouter.post('/session/erase', (req, res, next) => {
+    try {
+        redisClient.del(req.body.user)
+            .then((reply) => {
+                console.log("Clear session response:", reply);
+                return res.status(200).send({success: true, message: "Logged out"});
+            })
+            .catch((redisErr) => {
+                return next(ApiError.apiInternal('Error occured in erasing session'));
+            })
+    } catch (error) {
+        console.error("Error while erasing user session", error);
+        return next(ApiError.apiInternal('Error while erasing user session'));
+    }
+})
+
 module.exports = userRouter;
