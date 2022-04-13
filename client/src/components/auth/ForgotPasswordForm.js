@@ -5,7 +5,9 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useSnackbar } from "notistack";
 import passwordValidator from "../../utils/passwordValidator";
+import emailValidator from "../../utils/emailValidator";
 import PasswordHelper from "./PasswordHelper";
+import Helpertext from "../shared/HelperText";
 
 const initialForgotPasswordValues = {
     email: "",
@@ -28,13 +30,14 @@ const ForgotPasswordForm = (props) => {
     const { enqueueSnackbar } = useSnackbar();
 
     const handleForgotFormInputChange = (e) => {
+        let {name, value} = e.target;
         setFormValues({
             ...formValues,
-            [e.target.name]: e.target.value,
+            [name]: value,
         });
 
-        if (e.target.name === "password") {
-            let pwdErrors = passwordValidator(e.target.value);
+        if (name === "password") {
+            let pwdErrors = passwordValidator(value);
 
             setShowPasswordHelper(
                 !Object.values(pwdErrors).every((test) => test === false)
@@ -42,8 +45,23 @@ const ForgotPasswordForm = (props) => {
 
             setPasswordErrors({
                 ...passwordErrors,
-                [e.target.name]: pwdErrors,
+                [name]: pwdErrors,
             });
+        }
+
+        if(name === 'otp' && (!/[0-9]/i.test(value) || parseFloat(value) < 0)){
+            console.log("SS", !/[0-9]/i.test(value) || parseFloat(value) < 0)
+            setPasswordErrors({
+                ...passwordErrors,
+                [name]: 'Invalid OTP'
+            })
+        }
+
+        if(name === 'email'){
+            setPasswordErrors({
+                ...passwordErrors,
+                [name]: emailValidator(value),
+            })
         }
     };
 
@@ -79,6 +97,10 @@ const ForgotPasswordForm = (props) => {
                     })
                     .catch((otpErr) => {
                         console.error("OTP Error in Login:", otpErr?.response);
+                        if(otpErr?.response?.data?.message === 'Email already sent!'){
+                            setShowForgotForm(false);
+                            setShowOTPForm(true);
+                        }
                         return enqueueSnackbar(
                             otpErr?.response?.data?.message ??
                                 "Error occured while sending OTP",
@@ -175,8 +197,10 @@ const ForgotPasswordForm = (props) => {
                                 label={t("emailAddress")}
                                 value={formValues?.email}
                                 onChange={handleForgotFormInputChange}
+                                error={!!passwordErrors?.email}
                             />
                         </FormControl>
+                        <Helpertext text={passwordErrors?.email} style={{ width: "80%" }}/>
                         <FormControl fullWidth sx={{ width: "80%" }}>
                             <Button
                                 variant="contained"
@@ -206,8 +230,10 @@ const ForgotPasswordForm = (props) => {
                                 label="OTP"
                                 value={formValues.otp}
                                 onChange={handleForgotFormInputChange}
+                                error={!!passwordErrors.otp}
                             />
                         </FormControl>
+                        <Helpertext text={passwordErrors?.otp} style={{ width: "80%" }} />
                         <FormControl fullWidth sx={{ width: "80%" }}>
                             <Button
                                 variant="contained"

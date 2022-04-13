@@ -9,6 +9,7 @@
     "pizza": "Pizza",
     "dessert": "Dessert",
     "maincourse": "Plat principal",
+    "deleteWarningTitle": "Supprimer un élément de menu ?",
     "deleteWarning": "Cliquez sur le bouton Supprimer pour supprimer cet élément de menu de la liste. Cela supprimera l'élément des enregistrements et ne sera plus disponible plus tard !",
     "noMenuFoundMessage": "Oups! Aucun élément de menu trouvé.",
     "veg": "Légumes",

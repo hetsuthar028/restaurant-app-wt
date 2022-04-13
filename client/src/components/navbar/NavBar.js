@@ -57,13 +57,10 @@ const Navbar = () => {
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
+    
     const handleClose = () => {
         setAnchorEl(null);
     };
-
-    useEffect(() => {
-        setLanguage(window.localStorage.getItem("i18nextLng"));
-    }, []);
 
     const verifyCurrentUser = async () => {
         try {
@@ -101,8 +98,9 @@ const Navbar = () => {
         i18n.changeLanguage(e.target.value);
     };
 
-    useEffect(async () => {
-        await verifyCurrentUser();
+    useEffect(() => {
+        setLanguage(window.localStorage.getItem("i18nextLng"));
+        verifyCurrentUser();
     }, []);
 
     return (

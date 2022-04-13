@@ -9,6 +9,7 @@ const uploadImageRouter = require('./routes/upload-image-router');
 const otpRouter = require('./routes/otp-router');
 const cors = require('cors');
 const apiErrorHandler = require('./error/apiErrorHandler');
+const morgan = require('morgan');
 
 const app = express();
 
@@ -29,6 +30,7 @@ mongoose.connect(process.env.MONGO_URL, {
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(cors());
+app.use(morgan(':remote-addr - :remote-user [:date[web]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms'));
 
 // Routers connection
 app.use('/user/auth/', userRouter);
