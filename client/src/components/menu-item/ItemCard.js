@@ -3,6 +3,9 @@ import { Card, Grid, Typography, Button } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "./swiper.css";
 
 const ItemCard = (props) => {
     const { menuItem, handleOpenDeleteDialog, isAdmin } = props;
@@ -43,11 +46,26 @@ const ItemCard = (props) => {
                 </Grid>
 
                 <Grid item xs={12} md={12} sm={12}>
-                    <img
-                        // src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Nnx8Zm9vZHxlbnwwfHwwfHw%3D"
-                        src={menuItem.images[0]}
-                        style={{ height: "200px", width: "100%" }}
-                    />
+                    {menuItem.images.length === 0 ? (
+                        <img
+                            src="https://www.logomaker.com/api/main/images/1j+ojVVCOMkX9Wyrexe4hGff0anU9UJZxBzAwWIyPj1B...Q1vlSkqhvJ9sKNia1hV7FANhxwHe8c8jSxtAN5K0lM4oHrONIo="
+                            style={{ height: "200px", width: "auto" }}
+                        />
+                    ) : (
+                        <Swiper className="mySwiper">
+                            {menuItem.images.map((imageSrc) => (
+                                <SwiperSlide key={imageSrc}>
+                                    <img
+                                        src={imageSrc}
+                                        style={{
+                                            height: "200px",
+                                            width: "100%",
+                                        }}
+                                    />
+                                </SwiperSlide>
+                            ))}
+                        </Swiper>
+                    )}
                 </Grid>
 
                 <Grid item xs={12} md={12} sm={12} sx={{ pl: 2, py: 1 }}>
