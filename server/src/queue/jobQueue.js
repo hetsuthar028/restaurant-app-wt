@@ -6,8 +6,8 @@ const NUM_WORKERS = 5;
 // Upload images
 jobQueue.process(NUM_WORKERS, async ({ data }) => {
     console.log("Inside JQ", data);
+
     let { jobId, menuId, images, existingImages = [], authHeader } = data;
-    // console.log("INSIDE JQ 3", jobId, menuId, images);
     axios
         .post("http://localhost:5001/upload/bucket", {
             files: images,
@@ -33,20 +33,19 @@ jobQueue.process(NUM_WORKERS, async ({ data }) => {
                     console.log("Update resp in job queue:", updateResp.data);
                 })
                 .catch((updateErr) => {
-                    console.log("Update ERROR in job queue:", updateErr);
+                    console.error("Update ERROR in job queue:", updateErr);
                 });
         })
         .catch((uploadErr) => {
-            console.log("Error in upload request:", uploadErr);
+            console.error("Error in upload request:", uploadErr);
         });
 });
 
 jobQueue.on("failed", (error) => {
-    console.log(error.data.id, "failed", error.failedReason);
+    console.error(error.data.id, "failed", error.failedReason);
 });
 
 const addJobToQueue = async (jobId) => {
-    // console.log("Inside JQ 2", jobId);
     await jobQueue.add(jobId);
 };
 

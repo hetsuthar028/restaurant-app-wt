@@ -9,9 +9,7 @@ const { SESSION_TTL } = require('../util/sessionData');
 
 // Middleware
 const { userDataValidator } = require("../middlewares/user-validator");
-const { vertifyToken } = require("../middlewares/verify-token");
 const { verifyMyToken } = require("../middlewares/validate-token");
-const { isAdmin } = require('../middlewares/isAdmin');
 const { isSessionActive } = require('../middlewares/isSessionActive');
 const { default: axios } = require("axios");
 
@@ -89,11 +87,11 @@ userRouter.post("/login", (req, res, next) => {
                 return next(ApiError.badRequest('Invalid email or password'));
             })
             .catch((err) => {
-                console.log("Error while getting user", err);
+                console.error("Error while getting user", err);
                 return next(ApiError.badRequest('Invalid email or password'));
             });
     } catch (error) {
-        console.log("Some error", error);
+        console.error("Some error", error);
         next(error);
     }
 });
@@ -128,7 +126,7 @@ userRouter.post("/google/signin", (req, res, next) => {
                 return next(ApiError.badRequest('Please try again!'));
             });
     } catch (error) {
-        console.log("Error in G Sign In", error);
+        console.error("Error in G Sign In", error);
         return next(ApiError.apiInternal('Error while signing with google'));
     }
 });
@@ -144,7 +142,6 @@ userRouter.post('/facebook/signin', (req, res, next) => {
             access_token: accessToken
         })
         .then((profileResp) => {
-            console.log("Profile Resp:", profileResp.data);
 
             UserSchema.updateOne(
                 { email: email, is_deleted: false },
@@ -170,13 +167,11 @@ userRouter.post('/facebook/signin', (req, res, next) => {
                 });
 
         }).catch((profileErr) => {
-            console.log("Profile Error:", profileErr);
+            console.error("Profile Error:", profileErr);
+            return next(ApiError.apiInternal('Error while fetching user profile'));
         })
-
-        
-
     } catch (error) {
-        console.log("Error in facebook signin:", error);
+        console.error("Error in facebook signin:", error);
         return next(ApiError.apiInternal('Error while signing with facebook'));
     }
 })
@@ -200,7 +195,7 @@ userRouter.get("/currentuser", verifyMyToken, isSessionActive, (req, res) => {
             return res.status(200).send({ success: true, user });
         })
         .catch((userErr) => {
-            console.log("Error while fetching user", userErr.message);
+            console.error("Error while fetching user", userErr.message);
             return res
                 .status(400)
                 .send({ success: false, message: "Some error occured!" });

@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const { v4: uuid4 } = require('uuid');
 const fs = require('fs');
-
+const ApiError = require('../util/ApiError');
 // middlewares
 const { verifyMyToken } = require('../middlewares/validate-token');
 const { isAdmin } = require('../middlewares/isAdmin');
@@ -19,7 +19,6 @@ const metadata = {
     contentType: 'image/jpeg',
 };
 
-
 const uploadImageRouter = express.Router();
 
 const storageMulter = multer.diskStorage({
@@ -29,7 +28,6 @@ const storageMulter = multer.diskStorage({
 
     filename: function(req, file, cb) {
         cb(null, uuid4() + path.extname(file.originalname));
-        // cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
 });
 
@@ -38,23 +36,22 @@ const uploader = multer({
     storage: storageMulter,
 })
 
-uploadImageRouter.post('/cache', verifyMyToken, isAdmin, uploader.array('itemImage', 7), (req, res) => {
-    console.log("GOT POST REQ")
+uploadImageRouter.post('/cache', verifyMyToken, isAdmin, uploader.array('itemImage', 7), (req, res, next) => {
     try {
         if(!req.files){
-            return res.status(400).send({success: false, message: "Invalid image data"});
+            return next(ApiError.badRequest('Invalid image data'));
         }
 
         console.log(req.files);
         return res.status(201).send({success: true, filesNames: req.files.map((f) => f.filename)})
     } catch (error) {
-        console.log("Error::", error);
-        return res.status(400).send({success: false, message: "Could not upload the file"});
+        console.error("Error in uploading images to cache::", error);
+        return next(ApiError.apiInternal('Could not upload the files'));
     }
 });
 
 
-uploadImageRouter.post('/bucket', verifyMyToken, isAdmin, (req, res) => {
+uploadImageRouter.post('/bucket', verifyMyToken, isAdmin, (req, res, next) => {
     try {
         let { files, location, existingImages = [] } = req.body;
         let fileURLs = [];
@@ -77,21 +74,21 @@ uploadImageRouter.post('/bucket', verifyMyToken, isAdmin, (req, res) => {
                         fileURLs.push(url);
                     })
                     .catch((downloadErr) => {
-                        console.log("Error getting download url:", downloadErr);
+                        console.error("Error getting download url:", downloadErr);
                     })
                 })
                 .catch((uploadErr) => {
-                    console.log("Error uploading image:", uploadErr);
+                    console.error("Error uploading image:", uploadErr);
                 })
             if(Object.keys(fileURLs).length === files.length){
-                console.log("REturning", fileURLs);
+                console.log("Returning image URLs", fileURLs);
                 return res.status(201).send({success: true, fileURLs: [...existingImages, ...fileURLs]});
             }
         })
 
     } catch (error) {
-        console.log("Error::", error);
-        return res.status(400).send({success: false, message: "Could not upload the file"});
+        console.error("Error in uploading images::", error);
+        return next(ApiError.apiInternal('Could not upload the file'));
     }
 })
 

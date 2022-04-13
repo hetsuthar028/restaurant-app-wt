@@ -31,7 +31,6 @@ exports.verifyMyToken = async (req, res, next) => {
             }
         } else if (bearer["login_type"] === "google") {
             // Verify here google token id with google-auth-library
-
             const ticket = await client.verifyIdToken({
                 idToken: bearer.token,
                 audience: process.env.GOOGLE_CLIENT_ID,

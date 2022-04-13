@@ -32,7 +32,7 @@ otpRouter.post("/send", (req, res, next) => {
                         return cb(null);
                     })
                     .catch((err) => {
-                        console.log("Error in redis:", err);
+                        console.error("Error in redis:", err);
                         return cb(true, "Error in redis");
                     });
             },
@@ -61,13 +61,13 @@ otpRouter.post("/send", (req, res, next) => {
                         cb(null, "Email sent successfully!");
                     })
                     .catch((error) => {
-                        console.log("Error in sending email", error);
+                        console.error("Error in sending email", error);
                         return cb(true, "Error in sending email");
                     });
             },
         ],
         function (err, data) {
-            console.log(err, data);
+            console.error(err, data);
             if (err) {
                 return next(ApiError.badRequest(data));
             }
@@ -84,7 +84,6 @@ otpRouter.post("/verify", (req, res, next) => {
     redisClient
         .get(email)
         .then((resp) => {
-            console.log("Verify response", resp);
             if (resp == otp) {
                 redisClient.del(email);
                 return res
@@ -95,74 +94,9 @@ otpRouter.post("/verify", (req, res, next) => {
             }
         })
         .catch((err) => {
-            console.log("Error in verify:", err);
+            console.error("Error in verify:", err);
+            return next(ApiError.apiInternal('Some error occured while verifying otp!'));
         });
 });
-
-// @POST - Send an email with link
-// otpRouter.post('/send', (req, res) => {
-//     console.log("Received send request");
-//     async.waterfall([
-//         function(callback){
-//             console.log("First func")
-//             redisClient.exists(req.body.to)
-//             .then((resp) => {
-//                 if(resp === 1){
-//                     console.log("Email exists");
-//                     return callback(true, 'Email already sent!');
-//                 }
-//                 callback(null);
-//             })
-//             .catch((err) => {
-//                 console.log("Redis error");
-//                     return callback(true, 'Error in redis');
-//             })
-//         },
-//         function(cb){
-//             let randomNumber = Math.floor((Math.random() * 100) + 54);
-//             let encodedEmail = new Buffer(req.body.to).toString('base64');
-//             let link = 'http://' + req.get('host') + '/verify?mail='+encodedEmail+'&id='+randomNumber;
-//             let mailOptions = {
-//                 from: 'hetsuthar18@gnu.ac.in',
-//                 to: req.body.to,
-//                 subject: "Foodie Restaurant - Email verification",
-//                 html: 'Dear user, Please click on the following link to verify your email.' + link + '>Click here to verify',
-//             }
-//             console.log("Forwarded from 2");
-//             cb(null, mailOptions, randomNumber);
-//         },
-//         function(mailData, secretKey, cb){
-//             console.log("Mail data", mailData);
-
-//             transporter.sendMail(mailData).then((response) => {
-//                 console.log("Email sent");
-//                 redisClient.set(req.body.to, secretKey);
-//                 redisClient.expire(req.body.to, 60*10);
-//                 cb(null, 'Email sent successfully!');
-//             }).catch((error) => {
-//                 console.log("Error in sending email", error);
-//                 return cb(true, 'Error in sending email');
-//             })
-//         }
-//     ], function(err, data){
-//         console.log(err, data);
-//         return res.json({error: err === null ? false : true, data: data});
-//     })
-
-//     // let testAccount = await nodemailer.createTestAccount();
-//     // redisClient.set('hetmewada028@gmail.com', 'Helloworld');
-
-//     // let info = await transporter.sendMail({
-//     //     from: 'hetsuthar18@gnu.ac.in',
-//     //     to: 'hetsuthar028@gmail.com',
-//     //     subject: "Test email from nodemailer",
-//     //     text: "This is the dummy text included with the test email",
-//     //     html: '<h3>Hello World</h3>'
-//     // });
-
-//     // console.log('Message sent:', info.messageId);
-//     // console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
-//     // res.send('Mail sent');
-// });
 
 module.exports = otpRouter;

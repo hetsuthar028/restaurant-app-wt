@@ -1,13 +1,12 @@
 const express = require("express");
-const { menuItemValidator } = require("../middlewares/menu-item-validator");
 const MenuItemSchema = require("../models/MenuItem");
 const menuItemsRouter = express.Router();
-const axios = require("axios");
 const { addJobToQueue } = require("../queue/jobQueue");
 const { v4: uuid4 } = require("uuid");
 const ApiError = require("../util/ApiError");
 const { isAdmin } = require('../middlewares/isAdmin');
 const { verifyMyToken } = require('../middlewares/validate-token');
+const { menuItemValidator } = require("../middlewares/menu-item-validator");
 const { isSessionActive } = require('../middlewares/isSessionActive');
 
 const PAGE_SIZE = 4;
@@ -20,7 +19,7 @@ menuItemsRouter.post("/add", menuItemValidator, verifyMyToken, isSessionActive, 
         })
             .then((menuItem) => {
                 // Add a job to queue here with menu id, images
-                console.log("First resp", menuItem._id, req.body.images);
+
                 addJobToQueue({
                     jobId: uuid4(),
                     menuId: menuItem._id,
@@ -30,11 +29,11 @@ menuItemsRouter.post("/add", menuItemValidator, verifyMyToken, isSessionActive, 
                 return res.status(201).send({ success: true, menuItem });
             })
             .catch((menuItemErr) => {
-                console.log("Error in adding menu item in DB:", menuItemErr);
+                console.error("Error in adding menu item in DB:", menuItemErr);
                 return next(ApiError.badRequest("Menu item can't be added"));
             });
     } catch (error) {
-        console.log("Error in add menu item request;", error);
+        console.error("Error in add menu item request;", error);
         return next(ApiError.apiInternal('Some error occured while adding menu item'));
     }
 });
@@ -87,50 +86,29 @@ menuItemsRouter.get("/all", verifyMyToken, isSessionActive, (req, res, next) => 
         if(price === '' || price === '0' || price === undefined){
             delete sortingFilter['price'];
         }
-        if(page === undefined){
-            page = 0
-        }
-        if(size === undefined){
-            size = PAGE_SIZE;
-        }
 
         console.log("Filters", filters);
 
-        size = parseInt(size);
-        page = parseInt(page);
+        size = parseInt(size ?? PAGE_SIZE);
+        page = parseInt(page ?? 0);
 
         if(size < 0 || page < 0){
             return next(ApiError.badRequest('Invalid pagination request'));
         }
 
-
         MenuItemSchema.ensureIndexes({name: 'text'});
         MenuItemSchema.find({ is_deleted: false, ...filters }).sort({...sortingFilter})
             .then((menuItems) => {
                 console.log("Total records sent:", menuItems.length);
-                
-                // MenuItemSchema.count({is_deleted: false, ...filters})
-                //     .then((totalCount) => {
-                //         console.log("Total Count", totalCount);
-                //         let totalPages = Math.ceil(totalCount / size);
-                        
-                //     })
-
                 return res.status(200).send({ success: true, menuItems });
             })
             .catch((findErr) => {
                 console.log("Find error:", findErr);
                 return next(ApiError.badRequest("Can't find the requested information"));
-                // return res
-                //     .status(500)
-                //     .send({ success: false, message: "Some error occured!" });
             });
     } catch (error) {
         console.log("Error in add menu item request;", error);
         return next(ApiError.apiInternal('Please try again'));
-        // return res
-        //     .status(400)
-        //     .send({ success: false, message: "Please try again!" });
     }
 });
 
@@ -172,7 +150,6 @@ menuItemsRouter.put("/edit/:menuId", verifyMyToken, isSessionActive, isAdmin, (r
         )
             .then((menuItem) => {
                 if(req.body.images && req.body.name){
-                    console.log("Auth Header in Edit", req.headers.authorization);
                     addJobToQueue({
                         jobId: uuid4(),
                         menuId: menuId,

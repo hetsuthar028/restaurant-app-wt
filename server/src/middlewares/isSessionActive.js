@@ -9,7 +9,6 @@ exports.isSessionActive = (req, res, next) => {
         if(auth_type === 'normal'){
             redisClient.exists(userId)
                 .then((reply) => {     
-                    console.log("Redis Reply", reply);
                     if(reply === 1){
                         redisClient.expire(userId, SESSION_TTL);
                         next();
@@ -24,7 +23,6 @@ exports.isSessionActive = (req, res, next) => {
         else if ((auth_type === 'google') || (auth_type === 'facebook')){
             redisClient.exists(email)
                 .then((reply) => {
-                    console.log("Redis Reply", reply);
                     if(reply === 1){
                         redisClient.expire(email, SESSION_TTL);
                         next();

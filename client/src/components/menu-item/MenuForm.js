@@ -49,7 +49,7 @@ const MenuForm = () => {
     const [recipeList, setRecipeList] = useState([]);
     const [ingredientList, setIngredientList] = useState({});
     const [ingredientForm, setIngredientForm] = useState(initialIngredientForm);
-    const [uploadedImages, setUploadedImages] = useState({});
+    // const [uploadedImages, setUploadedImages] = useState({});
     const [formErrors, setFormErrors] = useState({});
     const [ingredientFormErrors, setIngredientFormErrors] = useState({});
     const [hasErrors, setHasErrors] = useState(true);
@@ -239,27 +239,21 @@ const MenuForm = () => {
                 },
             })
             .then((response) => {
-                let tempList = {};
                 let someArr = [];
 
                 Object.keys(files).forEach((key, idx) => {
                     let tempList2 = {};
-                    tempList[files[key].name] = response.data.filesNames[idx];
                     tempList2 = {
                         fileData: files[key],
                         filename: files[key].name,
                         cacheFile: response.data.filesNames[idx],
                     };
                     someArr.push(tempList2);
+                    
                     if (
-                        Object.keys(tempList).length ===
+                        Object.keys(someArr).length ===
                         response.data.filesNames.length
                     ) {
-                        setUploadedImages({
-                            ...uploadedImages,
-                            ...tempList,
-                        });
-
                         setAllImages([...allImages, ...someArr]);
                     }
                 });
