@@ -453,7 +453,7 @@ const MenuForm = () => {
                                             {t(
                                                 `home:${category.name
                                                     .toString()
-                                                    .toLowerCase()}`
+                                                    .toLowerCase().split(' ').join('')}`
                                             )}
                                         </MenuItem>
                                     ))}
