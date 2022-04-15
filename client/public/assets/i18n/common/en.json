@@ -1,0 +1,15 @@
+{
+    "appName": "Foodie",
+    "taglinePart1": "GOOD TIMES",
+    "taglinePart2": "WITH",
+    "taglinePart3": "GREAT FRIENDS",
+    "restaurant": "Restaurant",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "delete": "Delete",
+    "add": "Add",
+    "edit": "Edit",
+    "pageNotExistsTitle": "That Page Doesn't Exist!",
+    "pageNotExistsMessage": "Sorry, the page you were looking for could not be found.",
+    "visitHomeBtn": "Visit Home"
+}

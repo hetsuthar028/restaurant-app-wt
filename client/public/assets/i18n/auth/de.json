@@ -1,0 +1,16 @@
+{
+    "signup": "Anmeldung",
+    "emailAddress": "E-Mail-Addresse",
+    "username": "Nutzername",
+    "password": "Passwort",
+    "confirmPassword": "Bestätige das Passwort",
+    "alreadyHaveAnAccount": "Sie haben bereits ein Konto? Hier anmelden",
+    "dontHaveAnAccount": "Sie haben kein Konto? Hier anmelden",
+    "forgotPassword": "Passwort vergessen?",
+    "signInWithGoogle": "Anmeldung mit Google",
+    "login": "Einloggen",
+    "getOTP": "Holen Sie sich OTP",
+    "verifyOTP": "OTP überprüfen",
+    "newPassword": "Neues Kennwort",
+    "changePassword": "Ändere das Passwort"
+}

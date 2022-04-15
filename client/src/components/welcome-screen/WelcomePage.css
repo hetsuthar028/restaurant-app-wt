@@ -1,0 +1,12 @@
+@font-face {
+    font-family: "Bartender Serif";
+    src: local("Bartender Serif"),
+      url("../../fonts/bartender-bold-serif.ttf") format("truetype");
+    font-weight: normal;
+  }
+@font-face {
+    font-family: "Bartender SmCond Serif Pressed";
+    src: local("Bartender SmCond Serif Pressed"),
+      url("../../fonts/bartender-semicondensed-serif-pressed.ttf") format("truetype");
+    font-weight: normal;
+  }

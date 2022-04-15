@@ -1,0 +1,21 @@
+{
+    "starter": "Appetizer",
+    "searchFoodItems": "Lebensmittel suchen",
+    "price": "Preis",
+    "availability": "Verfügbarkeit",
+    "course": "Kurs",
+    "vegOrNonVeg": "Gemüse oder Nicht-Gemüse",
+    "beverages": "Getränke",
+    "pizza": "Pizza",
+    "dessert": "Nachtisch",
+    "maincourse": "Hauptkurs",
+    "deleteWarningTitle": "Menüpunkt löschen?",
+    "deleteWarning": "Klicken Sie auf die Schaltfläche Löschen, um diesen Menüpunkt aus der Liste zu entfernen. Dadurch wird der Artikel aus den Datensätzen entfernt und ist später nicht mehr verfügbar!",
+    "noMenuFoundMessage": "Hoppla! Keine Menüpunkte gefunden.",
+    "veg": "Gemüse",
+    "all": "Alle",
+    "nonVeg": "Nicht vegetarisch",
+    "notAvailable": "Nicht verfügbar",
+    "lowToHigh": "Niedrig bis hoch",
+    "highToLow": "Absteigend"
+}

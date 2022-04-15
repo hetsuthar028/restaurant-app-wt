@@ -1,0 +1,15 @@
+{
+    "appName": "Foodie",
+    "taglinePart1": "BONS TEMPS",
+    "taglinePart2": "AVEC",
+    "taglinePart3": "BONS AMIS",
+    "restaurant": "le restaurant",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "delete": "Supprimer",
+    "add": "Ajouter",
+    "edit": "Éditer",
+    "pageNotExistsTitle": "Cette page n'existe pas !",
+    "pageNotExistsMessage": "Désolé, la page que vous recherchez est introuvable.",
+    "visitHomeBtn": "Visitez la maison"
+}

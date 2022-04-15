@@ -1,0 +1,22 @@
+{
+    "starter": "Starter",
+    "searchFoodItems": "Search Food Items",
+    "price": "Price",
+    "availability": "Availability",
+    "course": "Course",
+    "vegOrNonVeg": "Veg or Non-veg",
+    "beverages": "Beverages",
+    "pizza": "Pizza",
+    "dessert": "Dessert",
+    "maincourse": "Main Course",
+    "deleteWarningTitle": "Delete a menu item?",
+    "deleteWarning": "Click on delete button to remove this menu item from the list. Doing this will remove item from records and won't be available later!",
+    "noMenuFoundMessage": "Oops! No menu items found.",
+    "veg": "Veg",
+    "all": "All",
+    "nonVeg": "Non-veg",
+    "available": "Available",
+    "notAvailable": "Not Available",
+    "lowToHigh": "Low to High",
+    "highToLow": "High to Low"
+}

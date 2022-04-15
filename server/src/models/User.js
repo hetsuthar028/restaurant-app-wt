@@ -26,9 +26,24 @@ const UserSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ['re.admin', 're.user'],
-            default: 're.user'
-        }
+            enum: ["re.admin", "re.user"],
+            default: "re.user",
+        },
+        auth_type: {
+            type: String,
+            required: true,
+            enum: ["normal", "google", "facebook"],
+        },
+        profile_url: {
+            type: String,
+            default: "",
+            required: false,
+        },
+        is_admin: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
     },
     {
         timestamps: true,
